@@ -4,26 +4,14 @@ import React, { useEffect, useRef, useCallback, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import {
-    ImageIcon,
-    FileUp,
-    MonitorIcon,
-    CircleUserRound,
     ArrowUpIcon,
-    Paperclip,
-    PlusIcon,
+    History,
+    Loader2,
+    RefreshCw,
+    XCircle,
 } from "lucide-react";
-
-function FigmaIcon({ className }: { className?: string }) {
-    return (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 5.5A3.5 3.5 0 0 1 8.5 2H12v7H8.5A3.5 3.5 0 0 1 5 5.5z" />
-            <path d="M12 2h3.5a3.5 3.5 0 1 1 0 7H12V2z" />
-            <path d="M12 12.5a3.5 3.5 0 1 1 7 0 3.5 3.5 0 1 1-7 0z" />
-            <path d="M5 19.5A3.5 3.5 0 0 1 8.5 16H12v3.5a3.5 3.5 0 1 1-7 0z" />
-            <path d="M5 12.5A3.5 3.5 0 0 1 8.5 9H12v7H8.5A3.5 3.5 0 0 1 5 12.5z" />
-        </svg>
-    );
-}
+import { AnimatedTicket } from "@/components/ui/ticket-confirmation-card";
+import { type UserSessionData } from "@/components/ui/auth-form-1";
 
 interface UseAutoResizeTextareaProps {
     minHeight: number;
@@ -46,10 +34,7 @@ function useAutoResizeTextarea({
                 return;
             }
 
-            // Temporarily shrink to get the right scrollHeight
             textarea.style.height = `${minHeight}px`;
-
-            // Calculate new height
             const newHeight = Math.max(
                 minHeight,
                 Math.min(
@@ -57,21 +42,18 @@ function useAutoResizeTextarea({
                     maxHeight ?? Number.POSITIVE_INFINITY
                 )
             );
-
             textarea.style.height = `${newHeight}px`;
         },
         [minHeight, maxHeight]
     );
 
     useEffect(() => {
-        // Set initial height
         const textarea = textareaRef.current;
         if (textarea) {
             textarea.style.height = `${minHeight}px`;
         }
     }, [minHeight]);
 
-    // Adjust height on window resize
     useEffect(() => {
         const handleResize = () => adjustHeight();
         window.addEventListener("resize", handleResize);
@@ -81,141 +63,285 @@ function useAutoResizeTextarea({
     return { textareaRef, adjustHeight };
 }
 
-export function VercelV0Chat() {
+// Authentic Web Audio chime replicating UPI confirmation sound
+function playConfirmationChime() {
+    try {
+        const AudioCtx =
+            window.AudioContext ||
+            (window as unknown as { webkitAudioContext: typeof AudioContext })
+                .webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(523.25, now);
+        osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.1);
+        gain1.gain.setValueAtTime(0.2, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.4);
+
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = "sine";
+        osc2.frequency.setValueAtTime(783.99, now + 0.12);
+        osc2.frequency.exponentialRampToValueAtTime(1046.5, now + 0.24);
+        gain2.gain.setValueAtTime(0.25, now + 0.12);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(now + 0.12);
+        osc2.stop(now + 0.75);
+    } catch {
+        // Fallback if blocked
+    }
+}
+
+interface VercelV0ChatProps {
+    user?: UserSessionData | null;
+    onViewHistory?: () => void;
+}
+
+export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
     const [value, setValue] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [lastAnalyzedObservation, setLastAnalyzedObservation] = useState<string>("");
+    const [error, setError] = useState<string | null>(null);
+    const [referenceCode, setReferenceCode] = useState<string>("");
+    const [ollamaStatus, setOllamaStatus] = useState<{
+        checked: boolean;
+        online: boolean;
+        model: string;
+    }>({
+        checked: false,
+        online: false,
+        model: "safety-phi3",
+    });
+
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({
         minHeight: 60,
         maxHeight: 200,
     });
 
+    // Check Ollama status on mount
+    useEffect(() => {
+        async function fetchStatus() {
+            try {
+                const res = await fetch("/api/analyze", { method: "GET" });
+                const data = await res.json();
+                setOllamaStatus({
+                    checked: true,
+                    online: data.online && data.targetModelFound,
+                    model: data.model || "safety-phi3",
+                });
+            } catch {
+                setOllamaStatus({
+                    checked: true,
+                    online: false,
+                    model: "safety-phi3",
+                });
+            }
+        }
+        fetchStatus();
+    }, []);
+
+    const handleAnalyze = async (textToAnalyze?: string) => {
+        const query = (textToAnalyze ?? value).trim();
+        if (!query || isLoading) return;
+
+        setIsLoading(true);
+        setError(null);
+        setLastAnalyzedObservation(query);
+
+        try {
+            const reporterPayload = user
+                ? {
+                      name: user.name,
+                      role:
+                          user.designation ||
+                          (user.role === "worker"
+                              ? "HSE Field Safety Officer (Derrick Floor)"
+                              : "HSE Operations Manager"),
+                      email: user.email,
+                      station: user.station || "Moran Rig #04 • Wellhead Section",
+                      radioChannel: user.radioChannel || "UHF CH-04",
+                      badgeId: user.badgeId || "OIL-FLD-5542",
+                      phone: user.phone || "+91 94350 44521",
+                      avatarUrl: user.avatarUrl,
+                  }
+                : undefined;
+
+            const res = await fetch("/api/analyze", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    observation: query,
+                    reporter: reporterPayload,
+                }),
+            });
+
+            const json = await res.json();
+
+            if (!res.ok || !json.success) {
+                throw new Error(json.error || "Failed to log concern.");
+            }
+
+            // Generate clean reference code
+            const ref = `OIL-HSE-${Math.floor(100000 + Math.random() * 900000)}`;
+            setReferenceCode(ref);
+
+            // Play confirmation chime
+            playConfirmationChime();
+
+            setIsSubmitted(true);
+            setValue("");
+            adjustHeight(true);
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
+            setError(msg);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            if (value.trim()) {
-                setValue("");
-                adjustHeight(true);
-            }
+            handleAnalyze();
         }
     };
 
     return (
-        <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8">
-            <h1 className="text-4xl font-bold text-neutral-900 text-center">
-                What safety observation would you like to analyze?
-            </h1>
-
-            <div className="w-full">
-                <div className="relative bg-white rounded-xl border border-neutral-200 shadow-sm focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-200 transition-all">
-                    <div className="overflow-y-auto">
-                        <Textarea
-                            ref={textareaRef}
-                            value={value}
-                            onChange={(e) => {
-                                setValue(e.target.value);
-                                adjustHeight();
-                            }}
-                            onKeyDown={handleKeyDown}
-                            placeholder="Describe an observation, near-miss report, or field incident..."
-                            className={cn(
-                                "w-full px-4 py-3",
-                                "resize-none",
-                                "bg-transparent",
-                                "border-none",
-                                "text-neutral-900 text-sm",
-                                "focus:outline-none",
-                                "focus-visible:ring-0 focus-visible:ring-offset-0",
-                                "placeholder:text-neutral-400 placeholder:text-sm",
-                                "min-h-[60px]"
-                            )}
-                            style={{
-                                overflow: "hidden",
-                            }}
-                        />
+        <div className="relative w-full h-full min-h-full flex-1 flex flex-col items-center justify-center p-4">
+            {isSubmitted ? (
+                /* Ticket Confirmation Card with Confetti Explosion */
+                <div className="w-full flex items-center justify-center my-auto animate-in fade-in zoom-in-95 duration-500">
+                    <AnimatedTicket
+                        ticketId={referenceCode}
+                        date={new Date()}
+                        cardHolder={user?.name ? `${user.name} (${user.badgeId || "OIL-FLD"})` : "Field Officer (OIL)"}
+                        last4Digits={user?.badgeId ? user.badgeId.slice(-4) : "5542"}
+                        barcodeValue={referenceCode.replace(/\D/g, "") || "928374829104"}
+                        title="YOUR CONCERN IS RECORDED."
+                        subtitle="THANKS FOR REPORTING."
+                        metaLabel="Operating Base"
+                        metaValue={user?.station || "Moran Rig #04"}
+                        observation={lastAnalyzedObservation}
+                        officerBadge={user?.badgeId || "OIL-FLD-5542"}
+                        officerStation={user?.station || "Moran Rig #04"}
+                        onReset={() => {
+                            setIsSubmitted(false);
+                            setValue("");
+                            adjustHeight(true);
+                        }}
+                        onViewHistory={onViewHistory}
+                    />
+                </div>
+            ) : (
+                /* Standard Observation Input Form */
+                <div className="w-full max-w-4xl mx-auto space-y-6 my-auto">
+                    {/* Header */}
+                    <div className="flex flex-col items-center text-center space-y-2">
+                        <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 tracking-tight">
+                            OIL AI Safety Intelligence
+                        </h1>
+                        <p className="text-sm text-neutral-500 max-w-xl">
+                            Log unsafe acts, unsafe conditions, or field observations. Concerns are automatically analyzed and forwarded to the HSE Manager for resolution.
+                        </p>
                     </div>
 
-                    <div className="flex items-center justify-between p-3 border-t border-neutral-100">
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="button"
-                                className="group p-2 hover:bg-neutral-100 rounded-lg transition-colors flex items-center gap-1 text-neutral-600 hover:text-neutral-900"
-                            >
-                                <Paperclip className="w-4 h-4 text-neutral-600 group-hover:text-neutral-900" />
-                                <span className="text-xs text-neutral-500 hidden group-hover:inline transition-opacity">
-                                    Attach
-                                </span>
-                            </button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="button"
-                                className="px-2.5 py-1 rounded-lg text-xs font-medium text-neutral-600 transition-colors border border-dashed border-neutral-300 hover:border-neutral-400 hover:bg-neutral-100 flex items-center justify-between gap-1"
-                            >
-                                <PlusIcon className="w-3.5 h-3.5" />
-                                Observation
-                            </button>
-                            <button
-                                type="button"
-                                className={cn(
-                                    "px-1.5 py-1.5 rounded-lg text-sm transition-colors flex items-center justify-between gap-1",
-                                    value.trim()
-                                        ? "bg-neutral-900 text-white hover:bg-neutral-800"
-                                        : "bg-neutral-100 text-neutral-400 border border-neutral-200"
-                                )}
-                            >
-                                <ArrowUpIcon
+                    {/* Input Box */}
+                    <div className="w-full">
+                        <div className="relative bg-white rounded-xl border border-neutral-200 shadow-sm focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-200 transition-all">
+                            <div className="overflow-y-auto">
+                                <Textarea
+                                    ref={textareaRef}
+                                    value={value}
+                                    onChange={(e) => {
+                                        setValue(e.target.value);
+                                        adjustHeight();
+                                    }}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Describe an observation, near-miss report, or field incident..."
                                     className={cn(
-                                        "w-4 h-4",
-                                        value.trim()
-                                            ? "text-white"
-                                            : "text-neutral-400"
+                                        "w-full px-4 py-3",
+                                        "resize-none",
+                                        "bg-transparent",
+                                        "border-none",
+                                        "text-neutral-900 text-sm",
+                                        "focus:outline-none",
+                                        "focus-visible:ring-0 focus-visible:ring-offset-0",
+                                        "placeholder:text-neutral-400 placeholder:text-sm",
+                                        "min-h-[60px]"
                                     )}
+                                    style={{ overflow: "hidden" }}
+                                    disabled={isLoading}
                                 />
-                                <span className="sr-only">Send</span>
-                            </button>
+                            </div>
+
+                            <div className="flex items-center justify-between p-3 border-t border-neutral-100">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs text-neutral-400">
+                                        Press <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-mono text-[10px]">Enter ↵</kbd> to submit
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleAnalyze()}
+                                        disabled={!value.trim() || isLoading}
+                                        className={cn(
+                                            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer",
+                                            value.trim() && !isLoading
+                                                ? "bg-neutral-900 text-white hover:bg-neutral-800 shadow-xs"
+                                                : "bg-neutral-100 text-neutral-400 border border-neutral-200 cursor-not-allowed"
+                                        )}
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                <span>Submitting...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span>Submit Concern</span>
+                                                <ArrowUpIcon className="w-3.5 h-3.5" />
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
-                    <ActionButton
-                        icon={<ImageIcon className="w-4 h-4" />}
-                        label="Analyze UA/UC Observation"
-                    />
-                    <ActionButton
-                        icon={<FigmaIcon className="w-4 h-4" />}
-                        label="Map Life-Saving Rules"
-                    />
-                    <ActionButton
-                        icon={<FileUp className="w-4 h-4" />}
-                        label="Upload Incident Report"
-                    />
-                    <ActionButton
-                        icon={<MonitorIcon className="w-4 h-4" />}
-                        label="Site Risk Assessment"
-                    />
-                    <ActionButton
-                        icon={<CircleUserRound className="w-4 h-4" />}
-                        label="HSE Field Action"
-                    />
+                    {/* Error Message */}
+                    {error && (
+                        <div className="w-full bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700 flex items-start gap-3">
+                            <XCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                                <p className="font-semibold">Submission Error</p>
+                                <p className="text-xs mt-0.5 text-red-600">{error}</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handleAnalyze()}
+                                className="px-2.5 py-1 bg-white border border-red-200 hover:bg-red-100 rounded-md text-xs font-medium text-red-700 cursor-pointer flex items-center gap-1"
+                            >
+                                <RefreshCw className="w-3 h-3" />
+                                Retry
+                            </button>
+                        </div>
+                    )}
                 </div>
-            </div>
+            )}
         </div>
-    );
-}
-
-interface ActionButtonProps {
-    icon: React.ReactNode;
-    label: string;
-}
-
-function ActionButton({ icon, label }: ActionButtonProps) {
-    return (
-        <button
-            type="button"
-            className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-neutral-100 rounded-full border border-neutral-200 text-neutral-600 hover:text-neutral-900 shadow-2xs transition-colors cursor-pointer"
-        >
-            {icon}
-            <span className="text-xs">{label}</span>
-        </button>
     );
 }

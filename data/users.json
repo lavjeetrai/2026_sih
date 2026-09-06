@@ -1,0 +1,80 @@
+[
+  {
+    "_id": "6a9d58b1d33fba34a94f6b86",
+    "name": "Lav Kumar",
+    "email": "lav@gmail.com",
+    "password": "123456",
+    "role": "worker",
+    "requestedRole": "worker",
+    "badgeId": "OIL-FLD-5542",
+    "designation": "HSE Field Safety Officer (Derrick Floor)",
+    "station": "Moran Rig #04 • Wellhead Section",
+    "radioChannel": "UHF CH-04",
+    "phone": "+91 94350 44521",
+    "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    "status": "approved",
+    "approval": {
+      "approvedByManagerName": "Priyanka Bora",
+      "approvedByManagerBadge": "OIL-MGR-1002",
+      "approvedByManagerEmail": "priyanka@oilindia.in",
+      "approvedByManagerDesignation": "Chief General Manager (Process Safety & SIF Control)",
+      "approvedAt": "2026-09-01T09:30:00.000Z",
+      "assignedRole": "worker",
+      "remarks": "Verified field competencies and rig safety clearance."
+    },
+    "createdAt": "2026-09-01T09:00:00.000Z",
+    "updatedAt": "2026-09-01T09:30:00.000Z"
+  },
+  {
+    "_id": "6a9d58b1d33fba34a94f6b87",
+    "name": "Priyanka Bora",
+    "email": "priyanka@oilindia.in",
+    "password": "123456",
+    "role": "manager",
+    "requestedRole": "manager",
+    "badgeId": "OIL-MGR-1002",
+    "designation": "Chief General Manager (Process Safety & SIF Control)",
+    "station": "Assam & Assam-Arakan Basin (Duliajan HQ)",
+    "radioChannel": "COMMAND CH-01",
+    "phone": "+91 374 280 4501 • Ext 402",
+    "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+    "status": "approved",
+    "approval": {
+      "approvedByManagerName": "OIL HSE Directorate",
+      "approvedByManagerBadge": "OIL-DIR-001",
+      "approvedByManagerEmail": "directorate@oilindia.in",
+      "approvedByManagerDesignation": "Executive Director (HSE Corporate Services)",
+      "approvedAt": "2026-08-15T10:00:00.000Z",
+      "assignedRole": "manager",
+      "remarks": "Corporate HSE Manager Clearance Authorization."
+    },
+    "createdAt": "2026-08-15T09:00:00.000Z",
+    "updatedAt": "2026-08-15T10:00:00.000Z"
+  },
+  {
+    "_id": "6a9d58b1d33fba34a94f6b88",
+    "name": "Debajit Saikia",
+    "email": "debajit.saikia@oilindia.in",
+    "password": "123456",
+    "role": "manager",
+    "requestedRole": "worker",
+    "badgeId": "OIL-FLD-5542",
+    "designation": "HSE Field Safety Officer (Derrick Operations)",
+    "station": "Moran Rig #04 • Wellhead Section",
+    "radioChannel": "UHF CH-04",
+    "phone": "+91 94350 44521",
+    "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    "status": "approved",
+    "createdAt": "2026-09-06T12:12:33.742Z",
+    "updatedAt": "2026-09-06T12:12:56.476Z",
+    "approval": {
+      "approvedByManagerName": "Priyanka Bora",
+      "approvedByManagerBadge": "OIL-MGR-1002",
+      "approvedByManagerEmail": "priyanka@oilindia.in",
+      "approvedByManagerDesignation": "Chief General Manager (Process Safety & SIF Control)",
+      "approvedAt": "2026-09-06T12:12:56.476Z",
+      "assignedRole": "manager",
+      "remarks": "Verified credentials and assigned station clearance at Moran Rig #04 • Wellhead Section."
+    }
+  }
+]

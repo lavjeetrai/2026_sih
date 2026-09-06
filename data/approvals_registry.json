@@ -1,0 +1,47 @@
+[
+  {
+    "candidateName": "Lav Kumar",
+    "candidateEmail": "lav@gmail.com",
+    "candidateBadgeId": "OIL-FLD-5542",
+    "candidateStation": "Moran Rig #04 • Wellhead Section",
+    "candidateRadioChannel": "UHF CH-04",
+    "candidatePhone": "+91 94350 44521",
+    "grantedRole": "worker",
+    "approvedByManagerName": "Priyanka Bora",
+    "approvedByManagerBadge": "OIL-MGR-1002",
+    "approvedByManagerEmail": "priyanka@oilindia.in",
+    "approvedByManagerDesignation": "Chief General Manager (Process Safety & SIF Control)",
+    "approvedAt": "2026-09-01T09:30:00.000Z",
+    "remarks": "Verified field competencies and rig safety clearance."
+  },
+  {
+    "candidateName": "Priyanka Bora",
+    "candidateEmail": "priyanka@oilindia.in",
+    "candidateBadgeId": "OIL-MGR-1002",
+    "candidateStation": "Assam & Assam-Arakan Basin (Duliajan HQ)",
+    "candidateRadioChannel": "COMMAND CH-01",
+    "candidatePhone": "+91 374 280 4501 • Ext 402",
+    "grantedRole": "manager",
+    "approvedByManagerName": "OIL HSE Directorate",
+    "approvedByManagerBadge": "OIL-DIR-001",
+    "approvedByManagerEmail": "directorate@oilindia.in",
+    "approvedByManagerDesignation": "Executive Director (HSE Corporate Services)",
+    "approvedAt": "2026-08-15T10:00:00.000Z",
+    "remarks": "Corporate HSE Manager Clearance Authorization."
+  },
+  {
+    "candidateName": "Debajit Saikia",
+    "candidateEmail": "debajit.saikia@oilindia.in",
+    "candidateBadgeId": "OIL-FLD-5542",
+    "candidateStation": "Moran Rig #04 • Wellhead Section",
+    "candidateRadioChannel": "UHF CH-04",
+    "candidatePhone": "+91 94350 44521",
+    "grantedRole": "manager",
+    "approvedByManagerName": "Priyanka Bora",
+    "approvedByManagerBadge": "OIL-MGR-1002",
+    "approvedByManagerEmail": "priyanka@oilindia.in",
+    "approvedByManagerDesignation": "Chief General Manager (Process Safety & SIF Control)",
+    "approvedAt": "2026-09-06T12:12:56.476Z",
+    "remarks": "Verified credentials and assigned station clearance at Moran Rig #04 • Wellhead Section."
+  }
+]

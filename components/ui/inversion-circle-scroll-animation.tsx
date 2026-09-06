@@ -17,6 +17,8 @@ import { VercelV0Chat } from "@/components/ui/v0-ai-chat";
 import { Sidenavbar } from "@/components/ui/sidenavbar";
 import { KanbanBoard } from "@/components/ui/kanban-board";
 import { BentoDashboard } from "@/components/ui/bento-dashboard";
+import { UserManagementPortal } from "@/components/ui/user-management-portal";
+import { OfficerConcernHistory } from "@/components/ui/officer-concern-history";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 const BALL_SIZE = 380; // px — fixed diameter during Phase 1 travel
@@ -25,8 +27,17 @@ const BALL_SIZE = 380; // px — fixed diameter during Phase 1 travel
 export default function InversionCircleScrollAnimation() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [userSession, setUserSession] = useState<UserSessionData | null>(null);
+  const [userSession, setUserSession] = useState<UserSessionData | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("oil_user_session");
+        if (saved) return JSON.parse(saved);
+      } catch {}
+    }
+    return null;
+  });
   const [managerTab, setManagerTab] = useState<string>("Home");
+  const [workerTab, setWorkerTab] = useState<string>("Home");
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -38,20 +49,57 @@ export default function InversionCircleScrollAnimation() {
 
   const handleLoginSuccess = (user: UserSessionData) => {
     setUserSession(user);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("oil_user_session", JSON.stringify(user));
+      } catch {}
+    }
     setIsAuthOpen(false);
   };
 
   const handleLogout = () => {
     setUserSession(null);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("oil_user_session");
+      } catch {}
+    }
+    setManagerTab("Home");
+    setWorkerTab("Home");
+  };
+
+  const handleUpdateUser = (updated: UserSessionData) => {
+    setUserSession(updated);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("oil_user_session", JSON.stringify(updated));
+      } catch {}
+    }
   };
 
   // If logged in as Worker
   if (userSession?.role === "worker") {
     return (
       <div className="h-screen bg-neutral-50 text-neutral-900 flex overflow-hidden">
-        <Sidenavbar user={userSession} onLogout={handleLogout}>
-          <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
-            <VercelV0Chat />
+        <Sidenavbar
+          user={userSession}
+          onLogout={handleLogout}
+          onUpdateUser={handleUpdateUser}
+          activeItem={workerTab}
+          onSelect={(tab) => setWorkerTab(tab)}
+        >
+          <div className="relative flex-1 flex flex-col items-center justify-center h-full w-full overflow-hidden">
+            {workerTab === "History" ? (
+              <OfficerConcernHistory
+                user={userSession}
+                onLogNewConcern={() => setWorkerTab("Home")}
+              />
+            ) : (
+              <VercelV0Chat
+                user={userSession}
+                onViewHistory={() => setWorkerTab("History")}
+              />
+            )}
           </div>
         </Sidenavbar>
       </div>
@@ -65,11 +113,18 @@ export default function InversionCircleScrollAnimation() {
         <Sidenavbar
           user={userSession}
           onLogout={handleLogout}
+          onUpdateUser={handleUpdateUser}
           activeItem={managerTab}
           onSelect={(tab) => setManagerTab(tab)}
         >
           <div className="flex-1 flex flex-col h-full overflow-hidden">
-            {managerTab === "Analytics" ? <BentoDashboard /> : <KanbanBoard />}
+            {managerTab === "Analytics" ? (
+              <BentoDashboard />
+            ) : managerTab === "Users" ? (
+              <UserManagementPortal currentManager={userSession} />
+            ) : (
+              <KanbanBoard user={userSession} />
+            )}
           </div>
         </Sidenavbar>
       </div>
@@ -116,7 +171,7 @@ export default function InversionCircleScrollAnimation() {
               <X className="h-5 w-5" />
             </button>
 
-            <div className="w-full max-w-md my-auto py-12">
+            <div className="w-full max-w-xl my-auto py-8">
               <Auth onLoginSuccess={handleLoginSuccess} />
             </div>
           </motion.div>

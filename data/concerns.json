@@ -1,0 +1,134 @@
+[
+  {
+    "id": "col-1",
+    "title": "To Do",
+    "cards": [
+      {
+        "id": "worker-concern-1788695082997",
+        "title": "Lifting & Mechanical Rigging Failure (Dropped Load) — During BOP stack installation on Moran Rig-04, the primary winch cable displayed severe wire strand fraying and unlatched secondary safety hook.",
+        "description": "Quote: \"primary winch cable displayed severe wire strand fraying and unlatched secondary safety hook\" | Failed Barrier: Certified Lifting Slings & Drop Zone Exclusion Barricade | Observation: During BOP stack installation on Moran Rig-04, the primary winch cable displayed severe wire strand fraying and unlatched secondary safety hook.",
+        "tags": [
+          {
+            "label": "Lifting & Mechanical Rigging Failure",
+            "dotColor": "bg-orange-500"
+          },
+          {
+            "label": "SIF 88",
+            "dotColor": "bg-red-500"
+          }
+        ],
+        "priority": "High",
+        "date": "Sep 6",
+        "comments": 0,
+        "attachments": 0,
+        "avatars": [
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "During BOP stack installation on Moran Rig-04, the primary winch cable displayed severe wire strand fraying and unlatched secondary safety hook.",
+        "hazard": "Lifting & Mechanical Rigging Failure (Dropped Load)",
+        "failed_barrier": "Certified Lifting Slings & Drop Zone Exclusion Barricade",
+        "evidence_quote": "primary winch cable displayed severe wire strand fraying and unlatched secondary safety hook",
+        "sif_score": 88,
+        "reportedAt": "Sep 6, 2026 • 05:14 PM IST",
+        "reporter": {
+          "name": "Debajit Saikia",
+          "role": "HSE Field Safety Officer (Derrick Operations)",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+          "email": "lav.kumar@oilindia.in",
+          "station": "Moran Rig #04 • Wellhead Section",
+          "radioChannel": "UHF CH-04",
+          "badgeId": "OIL-FLD-5542"
+        },
+        "llmSuggestions": [
+          "Immediately ground suspended load and barricade 1.5x crane swing drop-zone with high-visibility safety tape.",
+          "Perform thorough visual inspection on wire rope slings, shackles, and load hooks for elongation, kinks, or missing safety latches.",
+          "Re-verify Critical Lift Plan calculation sheet and ensure banksman / rigger certification is current before any further lift."
+        ],
+        "status": "To Do",
+        "columnId": "col-1",
+        "createdAt": "2026-09-06T11:44:42.997Z",
+        "_id": "6a9d522ad33fba34a94f6b85",
+        "updatedAt": "2026-09-06T13:29:05.834Z",
+        "reviewer": {
+          "name": "Lav Kumar",
+          "role": "HSE Field Safety Officer (Derrick Floor)",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+          "email": "lav@gmail.com",
+          "station": "Moran Rig #04 • Wellhead Section",
+          "radioChannel": "UHF CH-04",
+          "badgeId": "OIL-FLD-5542",
+          "phone": "+91 94350 44521"
+        }
+      }
+    ]
+  },
+  {
+    "id": "col-2",
+    "title": "In Progress",
+    "cards": [
+      {
+        "id": "worker-concern-1788697475394",
+        "title": "2000psi Hydrocarbon Gas / Vapor (Flammable/Toxic) — a worker is working in 2000psi pipeline and went into confined space and there is no electricity",
+        "description": "Quote: \"Worker entered 2000psi pipeline in Confined Space without Multi-Gas Atmospheric Testing or Confined Space Attendant\" | Failed Barrier: Confined Space Entry Permit, Multi-Gas Atmospheric Testing & Standby Attendant | Observation: a worker is working in 2000psi pipeline and went into confined space and there is no electricity",
+        "tags": [
+          {
+            "label": "2000psi Hydrocarbon Gas / Vapor",
+            "dotColor": "bg-amber-500"
+          },
+          {
+            "label": "SIF 85",
+            "dotColor": "bg-red-500"
+          }
+        ],
+        "priority": "High",
+        "date": "Sep 6",
+        "comments": 0,
+        "attachments": 0,
+        "avatars": [
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "a worker is working in 2000psi pipeline and went into confined space and there is no electricity",
+        "hazard": "2000psi Hydrocarbon Gas / Vapor (Flammable/Toxic)",
+        "failed_barrier": "Confined Space Entry Permit, Multi-Gas Atmospheric Testing & Standby Attendant",
+        "evidence_quote": "Worker entered 2000psi pipeline in Confined Space without Multi-Gas Atmospheric Testing or Confined Space Attendant",
+        "sif_score": 85,
+        "reportedAt": "Sep 6, 2026 • 05:54 PM IST",
+        "reporter": {
+          "name": "Lav Kumar",
+          "role": "HSE Field Safety Officer (Derrick Floor)",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+          "email": "lav@gmail.com",
+          "station": "Moran Rig #04 • Wellhead Section",
+          "radioChannel": "UHF CH-04",
+          "badgeId": "OIL-FLD-5542",
+          "phone": "+91 94350 44521"
+        },
+        "reviewer": {
+          "name": "Lav Kumar",
+          "role": "HSE Field Safety Officer (Derrick Floor)",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+          "email": "lav@gmail.com",
+          "station": "Moran Rig #04 • Wellhead Section",
+          "radioChannel": "UHF CH-04",
+          "badgeId": "OIL-FLD-5542",
+          "phone": "+91 94350 44521"
+        },
+        "llmSuggestions": [
+          "Evacuate non-essential personnel upwind to designated muster point and verify fixed detector loop telemetry with central control room.",
+          "Deploy portable multi-gas detector survey to establish 10 ppm H2S exclusion zone prior to manual maintenance authorization.",
+          "Require Type-C positive pressure SCBA apparatus for entry and verify calibration certificates of gas detection instrumentation."
+        ],
+        "status": "In Progress",
+        "columnId": "col-2",
+        "createdAt": "2026-09-06T12:24:35.394Z",
+        "_id": "6a9d5b83d33fba34a94f6b8a",
+        "updatedAt": "2026-09-06T12:25:24.866Z"
+      }
+    ]
+  },
+  {
+    "id": "col-3",
+    "title": "Done",
+    "cards": []
+  }
+]
