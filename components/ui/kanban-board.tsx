@@ -50,10 +50,10 @@ const INITIAL_BOARD: ColumnData[] = [
     cards: [
       {
         id: "c-1",
-        title: "Design System Update",
-        description: "Audit existing components and create new variants for dark mode.",
-        tags: [{ label: "Design", dotColor: "bg-purple-500" }],
-        priority: "Medium",
+        title: "Rig-04 Moran: Unlatched Derrick Harness",
+        description: "Audit derrick monkey board fall arresters and replace worn safety lanyards.",
+        tags: [{ label: "Height Work", dotColor: "bg-red-500" }],
+        priority: "High",
         date: "Oct 15",
         comments: 3,
         attachments: 2,
@@ -61,9 +61,9 @@ const INITIAL_BOARD: ColumnData[] = [
       },
       {
         id: "c-2",
-        title: "Landing Page Hero Iteration",
+        title: "Duliajan GGS: Fixed H2S Sensor Recalibration",
         coverImage: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
-        tags: [{ label: "Marketing", dotColor: "bg-blue-500" }],
+        tags: [{ label: "Gas Safety", dotColor: "bg-blue-500" }],
         priority: "High",
         comments: 12,
         avatars: [
@@ -79,9 +79,9 @@ const INITIAL_BOARD: ColumnData[] = [
     cards: [
       {
         id: "c-3",
-        title: "Fix Mobile Navigation Bug",
-        description: "The hamburger menu doesn't close automatically when tapping outside the container.",
-        tags: [{ label: "Bug", dotColor: "bg-orange-500" }],
+        title: "Naharkatiya Rig-2: Crane Sling Inspection",
+        description: "Inspect 30-ton BOP crane wire rope and certify lifting gear before rigging.",
+        tags: [{ label: "Lifting", dotColor: "bg-orange-500" }],
         priority: "High",
         date: "Oct 12",
         tasksCompleted: 2,
@@ -96,8 +96,8 @@ const INITIAL_BOARD: ColumnData[] = [
     cards: [
       {
         id: "c-4",
-        title: "Q3 Financial Report",
-        tags: [{ label: "Finance", dotColor: "bg-green-500" }],
+        title: "Digboi GGS: LOTO Verification for Separator",
+        tags: [{ label: "Isolation", dotColor: "bg-green-500" }],
         priority: "Low",
         date: "Oct 01",
         attachments: 4,
@@ -106,8 +106,6 @@ const INITIAL_BOARD: ColumnData[] = [
     ],
   },
 ];
-
-// --- Main Kanban Board Component ---
 
 export function KanbanBoard() {
   const [board, setBoard] = useState<ColumnData[]>(INITIAL_BOARD);
@@ -154,7 +152,7 @@ export function KanbanBoard() {
   };
 
   // --- Interactive Actions ---
-  const handleAddCard = (colId: string, title: string) => {
+  const handleAddCard = (columnId: string, title: string) => {
     const newCard: CardData = {
       id: `c-${Date.now()}`,
       title,
@@ -164,8 +162,8 @@ export function KanbanBoard() {
 
     setBoard((prev) =>
       prev.map((col) => {
-        if (col.id === colId) {
-          return { ...col, cards: [...col.cards, newCard] };
+        if (col.id === columnId) {
+          return { ...col, cards: [newCard, ...col.cards] };
         }
         return col;
       })
@@ -184,15 +182,15 @@ export function KanbanBoard() {
   };
 
   return (
-    <div className="w-full h-full bg-neutral-950 p-6 md:p-8 overflow-x-auto transition-colors flex flex-col font-sans">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="w-full h-full bg-neutral-50 p-6 md:p-8 transition-colors flex flex-col font-sans overflow-hidden">
+      <div className="mb-6 flex items-center justify-between shrink-0">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Manager Project Board</h1>
-          <p className="text-sm text-neutral-400 mt-1">Track sprint progress, tasks, and team milestones.</p>
+          <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">Manager Project Board</h1>
+          <p className="text-sm text-neutral-500 mt-1">Track safety interventions, field tasks, and team milestones.</p>
         </div>
       </div>
 
-      <div className="flex items-start gap-6 pb-6 flex-1">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-2 flex-1 w-full min-h-0">
         {board.map((col) => (
           <KanbanColumn
             key={col.id}
@@ -243,7 +241,7 @@ function KanbanColumn({
 
   return (
     <div
-      className="flex flex-col w-[320px] shrink-0 bg-neutral-900/60 border border-neutral-800 rounded-2xl p-4 max-h-[calc(100vh-160px)]"
+      className="flex flex-col w-full h-full min-h-0 bg-neutral-100/90 border border-neutral-200/90 rounded-2xl p-4 overflow-hidden shadow-2xs"
       onDragOver={(e) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
@@ -252,13 +250,13 @@ function KanbanColumn({
     >
       {/* Column Header */}
       <div className="flex items-center justify-between px-1 mb-4">
-        <h3 className="text-sm font-bold text-neutral-100 flex items-center gap-2">
+        <h3 className="text-sm font-bold text-neutral-800 flex items-center gap-2">
           {col.title}
-          <span className="text-xs font-semibold bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded-full border border-neutral-700">
+          <span className="text-xs font-semibold bg-white text-neutral-700 px-2 py-0.5 rounded-full border border-neutral-200 shadow-2xs">
             {col.cards.length}
           </span>
         </h3>
-        <button className="text-neutral-400 hover:text-neutral-200 transition-colors p-1">
+        <button className="text-neutral-400 hover:text-neutral-700 transition-colors p-1">
           <MoreHorizontal size={18} />
         </button>
       </div>
@@ -287,7 +285,7 @@ function KanbanColumn({
 
         {/* Empty State Visual Hint */}
         {col.cards.length === 0 && !isAdding && (
-          <div className="h-24 rounded-xl border-2 border-dashed border-neutral-800 flex items-center justify-center text-xs text-neutral-500">
+          <div className="h-24 rounded-xl border-2 border-dashed border-neutral-300 flex items-center justify-center text-xs text-neutral-400">
             Drop tasks here
           </div>
         )}
@@ -299,7 +297,7 @@ function KanbanColumn({
               autoFocus
               type="text"
               placeholder="What needs to be done?"
-              className="w-full p-3 text-sm rounded-xl border border-neutral-700 bg-neutral-900 text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all"
+              className="w-full p-3 text-sm rounded-xl border border-neutral-300 bg-white text-neutral-900 outline-none focus:ring-2 focus:ring-neutral-400 shadow-sm transition-all"
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               onKeyDown={(e) => {
@@ -316,7 +314,7 @@ function KanbanColumn({
           <button
             onClick={() => setIsAdding(true)}
             type="button"
-            className="mt-1 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border-2 border-dashed border-neutral-800 text-neutral-400 hover:text-neutral-200 hover:border-neutral-700 transition-colors text-xs font-semibold"
+            className="mt-1 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border-2 border-dashed border-neutral-300 text-neutral-500 hover:text-neutral-800 hover:border-neutral-400 bg-white/60 transition-colors text-xs font-semibold"
           >
             <Plus size={14} /> Add Task
           </button>
@@ -334,21 +332,21 @@ function KanbanCard({ card, onDelete }: { card: CardData; onDelete: () => void }
   const getPriorityColor = (p?: Priority) => {
     switch (p) {
       case "High":
-        return "text-red-400 bg-red-500/10 border border-red-500/20";
+        return "text-red-700 bg-red-50 border border-red-200";
       case "Medium":
-        return "text-orange-400 bg-orange-500/10 border border-orange-500/20";
+        return "text-amber-700 bg-amber-50 border border-amber-200";
       case "Low":
-        return "text-blue-400 bg-blue-500/10 border border-blue-500/20";
+        return "text-blue-700 bg-blue-50 border border-blue-200";
       default:
-        return "text-neutral-400 bg-neutral-800 border border-neutral-700";
+        return "text-neutral-700 bg-neutral-100 border border-neutral-200";
     }
   };
 
   return (
-    <div className="group relative flex flex-col w-full bg-neutral-900 rounded-xl border border-neutral-800/90 shadow-sm hover:border-neutral-700 transition-all duration-200 cursor-grab active:cursor-grabbing overflow-visible">
+    <div className="group relative flex flex-col w-full bg-white rounded-xl border border-neutral-200/90 shadow-2xs hover:border-neutral-300 hover:shadow-xs transition-all duration-200 cursor-grab active:cursor-grabbing overflow-visible">
       {/* Optional Cover Image */}
       {card.coverImage && (
-        <div className="w-full h-28 overflow-hidden rounded-t-xl border-b border-neutral-800">
+        <div className="w-full h-28 overflow-hidden rounded-t-xl border-b border-neutral-200">
           <img
             src={card.coverImage}
             alt="Cover"
@@ -359,7 +357,7 @@ function KanbanCard({ card, onDelete }: { card: CardData; onDelete: () => void }
 
       <div className="flex flex-col gap-3 p-4">
         {/* Subtle Drag Handle on Hover */}
-        <div className="absolute top-1/2 -left-3 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-neutral-600">
+        <div className="absolute top-1/2 -left-3 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-neutral-400">
           <GripVertical size={16} />
         </div>
 
@@ -369,7 +367,7 @@ function KanbanCard({ card, onDelete }: { card: CardData; onDelete: () => void }
             {card.tags?.map((tag, idx) => (
               <span
                 key={idx}
-                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold tracking-wide bg-neutral-800 text-neutral-300 uppercase"
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold tracking-wide bg-neutral-100 text-neutral-700 border border-neutral-200/60 uppercase"
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${tag.dotColor}`} />
                 {tag.label}
@@ -394,7 +392,7 @@ function KanbanCard({ card, onDelete }: { card: CardData; onDelete: () => void }
                 e.stopPropagation();
                 setShowMenu(!showMenu);
               }}
-              className="text-neutral-400 hover:text-neutral-200 transition-colors p-1"
+              className="text-neutral-400 hover:text-neutral-700 transition-colors p-1"
             >
               <MoreHorizontal size={16} />
             </button>
@@ -402,14 +400,14 @@ function KanbanCard({ card, onDelete }: { card: CardData; onDelete: () => void }
             {showMenu && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                <div className="absolute right-0 mt-1 w-28 bg-neutral-850 border border-neutral-700 rounded-lg shadow-xl overflow-hidden z-20 py-1 bg-neutral-800">
+                <div className="absolute right-0 mt-1 w-28 bg-white border border-neutral-200 rounded-lg shadow-lg overflow-hidden z-20 py-1">
                   <button
                     type="button"
                     onClick={() => {
                       onDelete();
                       setShowMenu(false);
                     }}
-                    className="w-full text-left px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2"
+                    className="w-full text-left px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
                   >
                     <Trash2 size={13} /> Delete
                   </button>
@@ -421,22 +419,22 @@ function KanbanCard({ card, onDelete }: { card: CardData; onDelete: () => void }
 
         {/* Body: Title & Description */}
         <div className="flex flex-col gap-1">
-          <h4 className="text-sm font-semibold text-neutral-100 leading-snug">
+          <h4 className="text-sm font-semibold text-neutral-900 leading-snug">
             {card.title}
           </h4>
           {card.description && (
-            <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed">
               {card.description}
             </p>
           )}
         </div>
 
         {/* Footer: Meta details & Avatars */}
-        <div className="flex items-center justify-between mt-1 pt-3 border-t border-neutral-800/80">
-          <div className="flex items-center gap-3 text-xs font-medium text-neutral-400">
+        <div className="flex items-center justify-between mt-1 pt-3 border-t border-neutral-100">
+          <div className="flex items-center gap-3 text-xs font-medium text-neutral-500">
             {card.date && (
               <div className="flex items-center gap-1">
-                <Calendar size={13} className="text-neutral-500" />
+                <Calendar size={13} className="text-neutral-400" />
                 <span className="text-[11px]">{card.date}</span>
               </div>
             )}
@@ -445,7 +443,7 @@ function KanbanCard({ card, onDelete }: { card: CardData; onDelete: () => void }
               <div className="flex items-center gap-1">
                 <CheckCircle2
                   size={13}
-                  className={card.tasksCompleted === card.tasksTotal ? "text-emerald-400" : "text-neutral-500"}
+                  className={card.tasksCompleted === card.tasksTotal ? "text-emerald-600" : "text-neutral-400"}
                 />
                 <span className="text-[11px]">
                   {card.tasksCompleted}/{card.tasksTotal}
@@ -454,15 +452,15 @@ function KanbanCard({ card, onDelete }: { card: CardData; onDelete: () => void }
             )}
 
             {card.comments !== undefined && card.comments > 0 && (
-              <div className="flex items-center gap-1 hover:text-neutral-200 cursor-pointer transition-colors">
-                <MessageSquare size={13} className="text-neutral-500" />
+              <div className="flex items-center gap-1 hover:text-neutral-800 cursor-pointer transition-colors">
+                <MessageSquare size={13} className="text-neutral-400" />
                 <span className="text-[11px]">{card.comments}</span>
               </div>
             )}
 
             {card.attachments !== undefined && card.attachments > 0 && (
               <div className="flex items-center gap-1">
-                <Paperclip size={13} className="text-neutral-500" />
+                <Paperclip size={13} className="text-neutral-400" />
                 <span className="text-[11px]">{card.attachments}</span>
               </div>
             )}
@@ -476,7 +474,7 @@ function KanbanCard({ card, onDelete }: { card: CardData; onDelete: () => void }
                   key={idx}
                   src={url}
                   alt="Assignee"
-                  className="w-6 h-6 rounded-full border-2 border-neutral-900 object-cover"
+                  className="w-6 h-6 rounded-full border-2 border-white object-cover"
                 />
               ))}
             </div>

@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Inversion Circle Scroll Animation",
-  description: "Scroll-driven circle inversion animation component",
+  title: "OIL India HSE | SIF-Precursor Analytics & Life-Saving Rules",
+  description:
+    "Oil India Limited (OIL) AI/NLP Safety Platform - Ranking sites and activities by SIF-precursor density and auto-mapping to Life-Saving Rules (LSR) for prioritized fatal potential interventions.",
 };
 
 export default function RootLayout({

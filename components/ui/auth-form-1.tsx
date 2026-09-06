@@ -5,12 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Briefcase, Camera, Eye, EyeOff, Loader2, MailCheck, Upload, User } from "lucide-react";
+import { ArrowLeft, Briefcase, Camera, Eye, EyeOff, Loader2, MailCheck, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
@@ -48,9 +47,6 @@ const signUpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  terms: z.boolean().refine((val) => val === true, {
-    message: "You must agree to the terms",
-  }),
 });
 
 const forgotPasswordSchema = z.object({
@@ -278,7 +274,7 @@ function AuthSignIn({ onForgotPassword, onSignUp, onLoginSuccess, defaultRole = 
     >
       <div className="mb-6 text-center">
         <h1 className="text-3xl font-semibold text-foreground">Welcome back</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Sign in to your account</p>
+        <p className="mt-2 text-sm text-muted-foreground">Sign in to your safety account</p>
       </div>
 
       {/* Role Selection Switcher */}
@@ -289,27 +285,27 @@ function AuthSignIn({ onForgotPassword, onSignUp, onLoginSuccess, defaultRole = 
             type="button"
             onClick={() => setSelectedRole("worker")}
             className={cn(
-              "flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-md transition-all",
+              "flex items-center justify-center gap-2 py-1.5 px-3 rounded-md text-xs font-semibold transition-all",
               selectedRole === "worker"
-                ? "bg-white text-zinc-950 shadow-sm"
+                ? "bg-white text-zinc-900 shadow-xs border border-zinc-200"
                 : "text-zinc-500 hover:text-zinc-900"
             )}
           >
             <User className="h-3.5 w-3.5" />
-            Worker
+            Field Officer
           </button>
           <button
             type="button"
             onClick={() => setSelectedRole("manager")}
             className={cn(
-              "flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-md transition-all",
+              "flex items-center justify-center gap-2 py-1.5 px-3 rounded-md text-xs font-semibold transition-all",
               selectedRole === "manager"
-                ? "bg-white text-zinc-950 shadow-sm"
+                ? "bg-white text-zinc-900 shadow-xs border border-zinc-200"
                 : "text-zinc-500 hover:text-zinc-900"
             )}
           >
             <Briefcase className="h-3.5 w-3.5" />
-            Manager
+            HSE Manager
           </button>
         </div>
       </div>
@@ -421,12 +417,10 @@ function AuthSignUp({ onSignIn, onLoginSuccess, defaultRole = "worker" }: AuthSi
     showPassword: false,
   });
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<SignUpFormValues>({
+  const { register, handleSubmit, formState: { errors } } = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { name: "", email: "", password: "", terms: false },
+    defaultValues: { name: "", email: "", password: "" },
   });
-
-  const terms = watch("terms");
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -468,7 +462,7 @@ function AuthSignUp({ onSignIn, onLoginSuccess, defaultRole = "worker" }: AuthSi
     >
       <div className="mb-6 text-center">
         <h1 className="text-3xl font-semibold text-foreground">Create account</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Get started with your account</p>
+        <p className="mt-2 text-sm text-muted-foreground">Get started with your safety account</p>
       </div>
 
       {/* Role Selection Switcher */}
@@ -479,27 +473,27 @@ function AuthSignUp({ onSignIn, onLoginSuccess, defaultRole = "worker" }: AuthSi
             type="button"
             onClick={() => setSelectedRole("worker")}
             className={cn(
-              "flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-md transition-all",
+              "flex items-center justify-center gap-2 py-1.5 px-3 rounded-md text-xs font-semibold transition-all",
               selectedRole === "worker"
-                ? "bg-white text-zinc-950 shadow-sm"
+                ? "bg-white text-zinc-900 shadow-xs border border-zinc-200"
                 : "text-zinc-500 hover:text-zinc-900"
             )}
           >
             <User className="h-3.5 w-3.5" />
-            Worker
+            Field Officer
           </button>
           <button
             type="button"
             onClick={() => setSelectedRole("manager")}
             className={cn(
-              "flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-md transition-all",
+              "flex items-center justify-center gap-2 py-1.5 px-3 rounded-md text-xs font-semibold transition-all",
               selectedRole === "manager"
-                ? "bg-white text-zinc-950 shadow-sm"
+                ? "bg-white text-zinc-900 shadow-xs border border-zinc-200"
                 : "text-zinc-500 hover:text-zinc-900"
             )}
           >
             <Briefcase className="h-3.5 w-3.5" />
-            Manager
+            HSE Manager
           </button>
         </div>
       </div>
@@ -588,33 +582,7 @@ function AuthSignUp({ onSignIn, onLoginSuccess, defaultRole = "worker" }: AuthSi
           {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
         </div>
 
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="terms"
-            checked={terms}
-            onCheckedChange={(checked) => setValue("terms", Boolean(checked), { shouldValidate: true })}
-            disabled={formState.isLoading}
-          />
-          <div className="space-y-1">
-            <Label htmlFor="terms" className="text-sm">
-              I agree to the terms
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              By signing up, you agree to our{" "}
-              <Button variant="link" className="h-auto p-0 text-xs">
-                Terms
-              </Button>{" "}
-              and{" "}
-              <Button variant="link" className="h-auto p-0 text-xs">
-                Privacy Policy
-              </Button>
-              .
-            </p>
-          </div>
-        </div>
-        {errors.terms && <p className="text-xs text-destructive">{errors.terms.message}</p>}
-
-        <Button type="submit" className="w-full" disabled={formState.isLoading}>
+        <Button type="submit" className="w-full mt-2" disabled={formState.isLoading}>
           {formState.isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

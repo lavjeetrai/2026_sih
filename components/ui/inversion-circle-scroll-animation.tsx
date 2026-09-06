@@ -11,7 +11,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, LogOut, User, X } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import { Auth, type UserSessionData } from "@/components/ui/auth-form-1";
 import { VercelV0Chat } from "@/components/ui/v0-ai-chat";
 import { Sidenavbar } from "@/components/ui/sidenavbar";
@@ -48,7 +48,7 @@ export default function InversionCircleScrollAnimation() {
   // If logged in as Worker
   if (userSession?.role === "worker") {
     return (
-      <div className="h-screen bg-neutral-950 text-white flex overflow-hidden">
+      <div className="h-screen bg-neutral-50 text-neutral-900 flex overflow-hidden">
         <Sidenavbar user={userSession} onLogout={handleLogout}>
           <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
             <VercelV0Chat />
@@ -61,7 +61,7 @@ export default function InversionCircleScrollAnimation() {
   // If logged in as Manager
   if (userSession?.role === "manager") {
     return (
-      <div className="h-screen bg-neutral-950 text-white flex overflow-hidden">
+      <div className="h-screen bg-neutral-50 text-neutral-900 flex overflow-hidden">
         <Sidenavbar
           user={userSession}
           onLogout={handleLogout}
@@ -182,8 +182,8 @@ function HeroSection({ wrapperRef }: { wrapperRef: WRef }) {
 
         {/* black text — always visible */}
         <div className="icsa-layer icsa-dark">
-          <h1>Design that moves.</h1>
-          <p>Scroll to reveal the future.</p>
+          <h1 suppressHydrationWarning>Zero Fatalities.</h1>
+          <p suppressHydrationWarning>AI-driven SIF precursor density & Life-Saving Rules intelligence.</p>
         </div>
 
         {/* white text — clipped to the circle (inversion) */}
@@ -191,8 +191,8 @@ function HeroSection({ wrapperRef }: { wrapperRef: WRef }) {
           className="icsa-layer icsa-light"
           style={{ clipPath: `circle(${clipR}px at ${clipX}px ${clipY}px)` }}
         >
-          <h1>Design that moves.</h1>
-          <p>Scroll to reveal the future.</p>
+          <h1 suppressHydrationWarning>Zero Fatalities.</h1>
+          <p suppressHydrationWarning>AI-driven SIF precursor density & Life-Saving Rules intelligence.</p>
         </div>
       </section>
     </div>
@@ -226,12 +226,11 @@ function ContentSection({
   return (
     <section ref={ref} className={`icsa-cs${on ? " on" : ""}`}>
       <div className="icsa-inner">
-        <span className="icsa-label">What comes next</span>
-        <h2>Build with intention.<br />Ship with confidence.</h2>
+        <span className="icsa-label">Safety Intelligence</span>
+        <h2>Target SIF Precursors.<br />Enforce Life-Saving Rules.</h2>
         <p>
-          Every great product starts with a clear vision and a simple idea.
-          From a blank canvas to something remarkable — the only thing between
-          you and it is the work.
+          Rank OIL sites by fatal potential density and auto-map field observations
+          to Life-Saving Rules to prioritize safety interventions.
         </p>
         <CTAButton onClick={onGetStarted} />
       </div>

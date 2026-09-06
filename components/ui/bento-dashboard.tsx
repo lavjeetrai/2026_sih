@@ -5,14 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
 // =========================================
-// 1. BRUTALIST BAR CHART
+// 1. BRUTALIST BAR CHART (SITE SIF DENSITY)
 // =========================================
 const BAR_DATA = [
-  { label: "MON", value: 40, color: "bg-red-400" },
-  { label: "TUE", value: 60, color: "bg-blue-400" },
-  { label: "WED", value: 25, color: "bg-green-400" },
-  { label: "THU", value: 80, color: "bg-yellow-400" },
-  { label: "FRI", value: 65, color: "bg-purple-400" },
+  { label: "MORAN RIG-4", value: 82, color: "bg-red-400" },
+  { label: "NAHARKATIYA", value: 68, color: "bg-yellow-400" },
+  { label: "DULIAJAN GGS", value: 45, color: "bg-blue-400" },
+  { label: "DIGBOI STN", value: 28, color: "bg-green-400" },
+  { label: "PIPELINE 4B", value: 14, color: "bg-purple-400" },
 ];
 
 const BrutalistBarChart = () => {
@@ -21,7 +21,7 @@ const BrutalistBarChart = () => {
   return (
     <div className="w-full h-full bg-white dark:bg-zinc-900 border-[3px] border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] relative flex flex-col p-6 transition-colors duration-200">
       <h3 className="font-black uppercase text-xl mb-6 border-b-[3px] border-black dark:border-white pb-2 text-black dark:text-white">
-        Weekly Traffic
+        Site SIF Density
       </h3>
       <div className="flex justify-between items-end flex-1 gap-2 sm:gap-4 min-h-[150px]">
         {BAR_DATA.map((item, i) => (
@@ -71,14 +71,14 @@ const BrutalistBarChart = () => {
 };
 
 // ==========================================
-// 2. BRUTALIST RADAR CHART
+// 2. LIFE-SAVING RULES (LSR) RADAR CHART
 // ==========================================
 const RADAR_DATA = [
-  { label: "SPEED", value: 85, color: "#f87171" },
-  { label: "UPTIME", value: 95, color: "#4ade80" },
-  { label: "SECURE", value: 75, color: "#60a5fa" },
-  { label: "UX", value: 65, color: "#fbbf24" },
-  { label: "SEO", value: 80, color: "#a78bfa" },
+  { label: "LINE OF FIRE", value: 88, color: "#ef4444" },
+  { label: "HEIGHT WORK", value: 76, color: "#f97316" },
+  { label: "ENERGY ISOLATION", value: 64, color: "#facc15" },
+  { label: "SAFE LIFTING", value: 58, color: "#38bdf8" },
+  { label: "CONFINED SPACE", value: 42, color: "#a855f7" },
 ];
 
 const NUM_AXES = RADAR_DATA.length;
@@ -113,7 +113,7 @@ const BrutalistRadarChart = () => {
       <div className="flex-1 flex items-center justify-center relative min-h-[250px]">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5 dark:opacity-10">
           <span className="text-8xl font-black uppercase text-black dark:text-white">
-            STATS
+            LSR
           </span>
         </div>
 
@@ -157,7 +157,7 @@ const BrutalistRadarChart = () => {
           {/* The Data Polygon */}
           <motion.path
             d={pathData}
-            fill="rgba(167, 139, 250, 0.5)"
+            fill="rgba(239, 68, 68, 0.4)"
             className="stroke-black dark:stroke-white"
             strokeWidth="4"
             strokeLinejoin="round"
@@ -211,7 +211,7 @@ const BrutalistRadarChart = () => {
       {/* RIGHT: STATS LIST */}
       <div className="w-full sm:w-40 flex flex-col justify-center gap-2 z-10">
         <h3 className="font-black uppercase text-xl mb-2 border-b-[3px] border-black dark:border-white pb-2 text-black dark:text-white">
-          System Health
+          Life-Saving Rules
         </h3>
         {RADAR_DATA.map((item, i) => (
           <motion.div
@@ -246,10 +246,10 @@ const BrutalistRadarChart = () => {
 // 3. BRUTALIST DONUT CHART
 // =========================================
 const PIE_DATA = [
-  { label: "CPU", value: 35, color: "#f87171" },
-  { label: "Memory", value: 25, color: "#4ade80" },
-  { label: "I/O", value: 25, color: "#60a5fa" },
-  { label: "Latency", value: 15, color: "#fbbf24" },
+  { label: "SIF-P", value: 42, color: "#f87171" },
+  { label: "Unsafe Acts", value: 28, color: "#4ade80" },
+  { label: "Unsafe Conditions", value: 18, color: "#60a5fa" },
+  { label: "Near Misses", value: 12, color: "#fbbf24" },
 ];
 
 const springConfig = { type: "spring" as const, stiffness: 300, damping: 20 };
@@ -261,7 +261,37 @@ const getPieCoords = (percent: number) => {
 
 const BrutalistDonut = () => {
   const [hoveredSlice, setHoveredSlice] = useState<string | null>(null);
-  let cumulativePercent = 0;
+
+  // Pre-calculate arc coordinates without mutating during render
+  const slicesWithCoords = PIE_DATA.reduce<
+    Array<{
+      label: string;
+      value: number;
+      color: string;
+      startX: number;
+      startY: number;
+      endX: number;
+      endY: number;
+      largeArcFlag: number;
+    }>
+  >((acc, slice) => {
+    const lastEnd = acc.length > 0 ? (acc[acc.length - 1].endX !== undefined ? (PIE_DATA.slice(0, acc.length).reduce((sum, s) => sum + s.value, 0) / 100) : 0) : 0;
+    const startPercent = lastEnd;
+    const endPercent = lastEnd + slice.value / 100;
+    const [startX, startY] = getPieCoords(startPercent);
+    const [endX, endY] = getPieCoords(endPercent);
+    const largeArcFlag = slice.value / 100 > 0.5 ? 1 : 0;
+
+    acc.push({
+      ...slice,
+      startX,
+      startY,
+      endX,
+      endY,
+      largeArcFlag,
+    });
+    return acc;
+  }, []);
 
   return (
     <div className="w-full h-full bg-white dark:bg-zinc-900 border-[3px] border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] p-6 flex flex-col items-center justify-between overflow-hidden relative transition-colors duration-200">
@@ -269,7 +299,7 @@ const BrutalistDonut = () => {
         className="absolute inset-0 opacity-[0.07] pointer-events-none z-0 bg-[radial-gradient(#000_1.5px,transparent_1.5px)] dark:bg-[radial-gradient(#fff_1.5px,transparent_1.5px)] [background-size:12px_12px]"
       />
       <h3 className="font-black uppercase tracking-tighter text-2xl border-b-[3px] border-black dark:border-white pb-2 mb-8 w-full text-center z-10 text-black dark:text-white">
-        System Load
+        Observation Split
       </h3>
       <div className="z-10 flex flex-col items-center w-full h-full justify-center">
         <div className="relative w-64 h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 xl:w-96 xl:h-96">
@@ -285,16 +315,10 @@ const BrutalistDonut = () => {
               delay: 0.2,
             }}
           >
-            {PIE_DATA.map((slice) => {
-              const startPercent = cumulativePercent;
-              const endPercent = cumulativePercent + slice.value / 100;
-              cumulativePercent = endPercent;
-              const [startX, startY] = getPieCoords(startPercent);
-              const [endX, endY] = getPieCoords(endPercent);
-              const largeArcFlag = slice.value / 100 > 0.5 ? 1 : 0;
+            {slicesWithCoords.map((slice) => {
               const pathData = [
-                `M ${startX} ${startY}`,
-                `A 1 1 0 ${largeArcFlag} 1 ${endX} ${endY}`,
+                `M ${slice.startX} ${slice.startY}`,
+                `A 1 1 0 ${slice.largeArcFlag} 1 ${slice.endX} ${slice.endY}`,
                 `L 0 0`,
               ].join(" ");
               const isHovered = hoveredSlice === slice.label;
@@ -310,8 +334,8 @@ const BrutalistDonut = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   animate={{
-                    translateX: isHovered ? (startX + endX) * 0.1 : 0,
-                    translateY: isHovered ? (startY + endY) * 0.1 : 0,
+                    translateX: isHovered ? (slice.startX + slice.endX) * 0.1 : 0,
+                    translateY: isHovered ? (slice.startY + slice.endY) * 0.1 : 0,
                     scale: isHovered ? 1.05 : 1,
                     opacity: isDimmed ? 0.3 : 1,
                     filter: isDimmed ? "grayscale(80%)" : "grayscale(0%)",
@@ -403,14 +427,14 @@ const BrutalistDonut = () => {
 // =========================================
 export function BentoDashboard() {
   return (
-    <div className="w-full h-full bg-neutral-950 p-6 md:p-8 overflow-y-auto text-white font-sans flex flex-col">
+    <div className="w-full h-full bg-neutral-50 p-6 md:p-8 overflow-y-auto text-neutral-900 font-sans flex flex-col">
       <div className="max-w-7xl w-full mx-auto relative z-10 flex flex-col flex-1">
         <header className="mb-6 md:mb-8">
-          <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight mb-1 text-white">
+          <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight mb-1 text-neutral-900">
             Analytics
           </h1>
-          <p className="font-bold text-neutral-400 uppercase tracking-widest text-xs">
-            System Overview & Performance Dashboard
+          <p className="font-bold text-neutral-500 uppercase tracking-widest text-xs">
+            SIF-Precursor & Life-Saving Rules Dashboard
           </p>
         </header>
 

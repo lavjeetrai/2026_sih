@@ -100,12 +100,12 @@ export function VercelV0Chat() {
 
     return (
         <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8">
-            <h1 className="text-4xl font-bold text-black dark:text-white text-center">
-                What can I help you ship?
+            <h1 className="text-4xl font-bold text-neutral-900 text-center">
+                What safety observation would you like to analyze?
             </h1>
 
             <div className="w-full">
-                <div className="relative bg-neutral-900 rounded-xl border border-neutral-800">
+                <div className="relative bg-white rounded-xl border border-neutral-200 shadow-sm focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-200 transition-all">
                     <div className="overflow-y-auto">
                         <Textarea
                             ref={textareaRef}
@@ -115,16 +115,16 @@ export function VercelV0Chat() {
                                 adjustHeight();
                             }}
                             onKeyDown={handleKeyDown}
-                            placeholder="Ask v0 a question..."
+                            placeholder="Describe an observation, near-miss report, or field incident..."
                             className={cn(
                                 "w-full px-4 py-3",
                                 "resize-none",
                                 "bg-transparent",
                                 "border-none",
-                                "text-white text-sm",
+                                "text-neutral-900 text-sm",
                                 "focus:outline-none",
                                 "focus-visible:ring-0 focus-visible:ring-offset-0",
-                                "placeholder:text-neutral-500 placeholder:text-sm",
+                                "placeholder:text-neutral-400 placeholder:text-sm",
                                 "min-h-[60px]"
                             )}
                             style={{
@@ -133,14 +133,14 @@ export function VercelV0Chat() {
                         />
                     </div>
 
-                    <div className="flex items-center justify-between p-3">
+                    <div className="flex items-center justify-between p-3 border-t border-neutral-100">
                         <div className="flex items-center gap-2">
                             <button
                                 type="button"
-                                className="group p-2 hover:bg-neutral-800 rounded-lg transition-colors flex items-center gap-1"
+                                className="group p-2 hover:bg-neutral-100 rounded-lg transition-colors flex items-center gap-1 text-neutral-600 hover:text-neutral-900"
                             >
-                                <Paperclip className="w-4 h-4 text-white" />
-                                <span className="text-xs text-zinc-400 hidden group-hover:inline transition-opacity">
+                                <Paperclip className="w-4 h-4 text-neutral-600 group-hover:text-neutral-900" />
+                                <span className="text-xs text-neutral-500 hidden group-hover:inline transition-opacity">
                                     Attach
                                 </span>
                             </button>
@@ -148,26 +148,26 @@ export function VercelV0Chat() {
                         <div className="flex items-center gap-2">
                             <button
                                 type="button"
-                                className="px-2 py-1 rounded-lg text-sm text-zinc-400 transition-colors border border-dashed border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800 flex items-center justify-between gap-1"
+                                className="px-2.5 py-1 rounded-lg text-xs font-medium text-neutral-600 transition-colors border border-dashed border-neutral-300 hover:border-neutral-400 hover:bg-neutral-100 flex items-center justify-between gap-1"
                             >
-                                <PlusIcon className="w-4 h-4" />
-                                Project
+                                <PlusIcon className="w-3.5 h-3.5" />
+                                Observation
                             </button>
                             <button
                                 type="button"
                                 className={cn(
-                                    "px-1.5 py-1.5 rounded-lg text-sm transition-colors border border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800 flex items-center justify-between gap-1",
+                                    "px-1.5 py-1.5 rounded-lg text-sm transition-colors flex items-center justify-between gap-1",
                                     value.trim()
-                                        ? "bg-white text-black"
-                                        : "text-zinc-400"
+                                        ? "bg-neutral-900 text-white hover:bg-neutral-800"
+                                        : "bg-neutral-100 text-neutral-400 border border-neutral-200"
                                 )}
                             >
                                 <ArrowUpIcon
                                     className={cn(
                                         "w-4 h-4",
                                         value.trim()
-                                            ? "text-black"
-                                            : "text-zinc-400"
+                                            ? "text-white"
+                                            : "text-neutral-400"
                                     )}
                                 />
                                 <span className="sr-only">Send</span>
@@ -179,23 +179,23 @@ export function VercelV0Chat() {
                 <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
                     <ActionButton
                         icon={<ImageIcon className="w-4 h-4" />}
-                        label="Clone a Screenshot"
+                        label="Analyze UA/UC Observation"
                     />
                     <ActionButton
                         icon={<FigmaIcon className="w-4 h-4" />}
-                        label="Import from Figma"
+                        label="Map Life-Saving Rules"
                     />
                     <ActionButton
                         icon={<FileUp className="w-4 h-4" />}
-                        label="Upload a Project"
+                        label="Upload Incident Report"
                     />
                     <ActionButton
                         icon={<MonitorIcon className="w-4 h-4" />}
-                        label="Landing Page"
+                        label="Site Risk Assessment"
                     />
                     <ActionButton
                         icon={<CircleUserRound className="w-4 h-4" />}
-                        label="Sign Up Form"
+                        label="HSE Field Action"
                     />
                 </div>
             </div>
@@ -212,7 +212,7 @@ function ActionButton({ icon, label }: ActionButtonProps) {
     return (
         <button
             type="button"
-            className="flex items-center gap-2 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 rounded-full border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-neutral-100 rounded-full border border-neutral-200 text-neutral-600 hover:text-neutral-900 shadow-2xs transition-colors cursor-pointer"
         >
             {icon}
             <span className="text-xs">{label}</span>
