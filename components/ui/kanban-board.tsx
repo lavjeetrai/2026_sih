@@ -197,26 +197,33 @@ export function KanbanBoard({ user }: { user?: UserSessionData | null } = {}) {
 
       const targetCol = newBoard[targetColIndex];
       const newStatus = (targetCol.title || "To Do") as "To Do" | "In Progress" | "Done";
+      const isClaimedOrDone =
+        targetColId === "col-2" ||
+        targetColId === "col-3" ||
+        newStatus === "In Progress" ||
+        newStatus === "Done";
 
       const updatedCard: CardData = {
         ...draggingCard.card,
         status: newStatus,
         columnId: targetColId,
         updatedAt: new Date().toISOString(),
-        reviewer: user
-          ? {
-              name: user.name,
-              role: user.designation || "HSE Operations Manager",
-              avatarUrl:
-                user.avatarUrl ||
-                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
-              email: user.email,
-              station: user.station || "Duliajan Corporate HQ",
-              radioChannel: user.radioChannel || "COMMAND CH-01",
-              badgeId: user.badgeId || "OIL-MGR-1002",
-              phone: user.phone || "+91 374 280 4501",
-            }
-          : draggingCard.card.reviewer,
+        reviewer: isClaimedOrDone
+          ? user
+            ? {
+                name: user.name,
+                role: user.designation || "HSE Operations Manager",
+                avatarUrl:
+                  user.avatarUrl ||
+                  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
+                email: user.email,
+                station: user.station || "Duliajan Corporate HQ",
+                radioChannel: user.radioChannel || "COMMAND CH-01",
+                badgeId: user.badgeId || "OIL-MGR-1002",
+                phone: user.phone || "+91 374 280 4501",
+              }
+            : draggingCard.card.reviewer
+          : undefined,
       };
 
       // Remove from source
@@ -257,26 +264,33 @@ export function KanbanBoard({ user }: { user?: UserSessionData | null } = {}) {
 
       const targetCol = cleanBoard.find((c) => c.id === targetColId);
       const newStatus = (targetCol?.title || "In Progress") as "To Do" | "In Progress" | "Done";
+      const isClaimedOrDone =
+        targetColId === "col-2" ||
+        targetColId === "col-3" ||
+        newStatus === "In Progress" ||
+        newStatus === "Done";
 
       const processedCard: CardData = {
         ...validCard,
         status: newStatus,
         columnId: targetColId,
         updatedAt: new Date().toISOString(),
-        reviewer: user
-          ? {
-              name: user.name,
-              role: user.designation || "HSE Operations Manager",
-              avatarUrl:
-                user.avatarUrl ||
-                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
-              email: user.email,
-              station: user.station || "Duliajan Corporate HQ",
-              radioChannel: user.radioChannel || "COMMAND CH-01",
-              badgeId: user.badgeId || "OIL-MGR-1002",
-              phone: user.phone || "+91 374 280 4501",
-            }
-          : validCard.reviewer,
+        reviewer: isClaimedOrDone
+          ? user
+            ? {
+                name: user.name,
+                role: user.designation || "HSE Operations Manager",
+                avatarUrl:
+                  user.avatarUrl ||
+                  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
+                email: user.email,
+                station: user.station || "Duliajan Corporate HQ",
+                radioChannel: user.radioChannel || "COMMAND CH-01",
+                badgeId: user.badgeId || "OIL-MGR-1002",
+                phone: user.phone || "+91 374 280 4501",
+              }
+            : validCard.reviewer
+          : undefined,
       };
 
       const newBoard = cleanBoard.map((col) => {

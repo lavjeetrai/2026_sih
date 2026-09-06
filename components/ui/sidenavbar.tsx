@@ -9,6 +9,7 @@ import {
   ChevronsUpDown,
   History,
   Home,
+  LogOut,
   Menu,
   Users,
 } from "lucide-react";
@@ -62,12 +63,12 @@ export function Sidenavbar({
           "flex flex-col border-r border-neutral-200 bg-white text-neutral-900 transition-all duration-300 ease-in-out shrink-0 select-none shadow-xs"
         )}
       >
-        {/* Sidebar Header */}
-        <div className="flex h-16 items-center justify-between border-b border-neutral-200 px-4">
+        {/* Sidebar Header / Toggle */}
+        <div className="flex h-12 items-center justify-between border-b border-neutral-200 px-3 shrink-0">
           <span
             className={cn(
               isOpen ? "block" : "hidden",
-              "text-lg font-semibold tracking-tight text-neutral-900"
+              "text-xs font-bold uppercase tracking-wider text-neutral-400"
             )}
           >
             Menu
@@ -76,9 +77,10 @@ export function Sidenavbar({
             variant="ghost"
             size="icon"
             onClick={() => setIsOpen(!isOpen)}
-            className="text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100"
+            className="text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 h-8 w-8 ml-auto"
+            title={isOpen ? "Collapse menu" : "Expand menu"}
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-4 w-4" />
           </Button>
         </div>
 
@@ -158,7 +160,7 @@ export function Sidenavbar({
 
         {/* User Profile Footer in Navbar Bottom */}
         {user && (
-          <div className="p-2 border-t border-neutral-200">
+          <div className="p-2 border-t border-neutral-200 flex flex-col gap-1.5">
             <button
               type="button"
               onClick={() => setIsProfileCardOpen((prev) => !prev)}
@@ -182,8 +184,8 @@ export function Sidenavbar({
                     <span className="text-sm font-semibold text-neutral-900 truncate leading-tight group-hover:text-emerald-700 transition-colors">
                       {user.name || "User"}
                     </span>
-                    <span className="text-[11px] text-neutral-500 truncate leading-tight">
-                      {user.badgeId || user.role} • {user.station || user.email}
+                    <span className="text-[11px] text-neutral-500 truncate leading-tight font-mono">
+                      {user.badgeId || user.role}
                     </span>
                   </div>
                   <ChevronsUpDown
@@ -195,6 +197,22 @@ export function Sidenavbar({
                 </div>
               )}
             </button>
+
+            {/* Direct Sign Out Button at bottom of sidebar */}
+            {onLogout && (
+              <button
+                type="button"
+                onClick={onLogout}
+                className={cn(
+                  "w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-neutral-600 hover:text-red-700 hover:bg-red-50 border border-neutral-200/70 hover:border-red-200 transition-colors cursor-pointer text-xs font-medium",
+                  !isOpen && "justify-center px-0"
+                )}
+                title="Sign Out of Session"
+              >
+                <LogOut className="h-3.5 w-3.5 shrink-0" />
+                {isOpen && <span>Sign Out</span>}
+              </button>
+            )}
           </div>
         )}
       </aside>

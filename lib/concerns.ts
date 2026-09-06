@@ -448,17 +448,7 @@ export async function addConcernFromWorker(payload: WorkerConcernPayload): Promi
             badgeId: "OIL-FLD-5542",
             phone: "+91 94350 44521",
           },
-    reviewer: {
-      name: "Priyanka Bora",
-      role: "Chief General Manager (Process Safety & SIF Control)",
-      avatarUrl:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
-      email: "priyanka@oilindia.in",
-      station: "Assam & Assam-Arakan Basin (Duliajan HQ)",
-      radioChannel: "COMMAND CH-01",
-      badgeId: "OIL-MGR-1002",
-      phone: "+91 374 280 4501 • Ext 402",
-    },
+    reviewer: undefined,
     llmSuggestions,
     status: "To Do",
     columnId: "col-1",

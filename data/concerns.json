@@ -4,6 +4,100 @@
     "title": "To Do",
     "cards": [
       {
+        "id": "worker-concern-1788716886017",
+        "title": "Flammable/Gaseous Atmosphere — Oil spill of approximately 200 ml observed near workshop entrance. Area cleaned immediately.",
+        "description": "Quote: \"Oil spill of approximately 200 ml observed near workshop entrance. Area cleaned immediately.\" | Failed Barrier: Confined Space Entry Permit, Multi-Gas Atmospheric Testing & Ventilation",
+        "tags": [
+          {
+            "label": "Flammable/Gaseous Atmosphere",
+            "dotColor": "bg-amber-500"
+          },
+          {
+            "label": "SIF 15",
+            "dotColor": "bg-blue-500"
+          }
+        ],
+        "priority": "Low",
+        "date": "Sep 6",
+        "comments": 0,
+        "attachments": 0,
+        "avatars": [
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Oil spill of approximately 200 ml observed near workshop entrance. Area cleaned immediately.",
+        "hazard": "Flammable/Gaseous Atmosphere",
+        "failed_barrier": "Confined Space Entry Permit, Multi-Gas Atmospheric Testing & Ventilation",
+        "evidence_quote": "Oil spill of approximately 200 ml observed near workshop entrance. Area cleaned immediately.",
+        "sif_score": 15,
+        "reportedAt": "Sep 6, 2026 • 11:18 PM IST",
+        "reporter": {
+          "name": "Lav Kumar",
+          "role": "HSE Field Safety Officer (Derrick Floor)",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+          "email": "lav@gmail.com",
+          "station": "Moran Rig #04 • Wellhead Section",
+          "radioChannel": "UHF CH-04",
+          "badgeId": "OIL-FLD-5542",
+          "phone": "+91 94350 44521"
+        },
+        "reviewer": null,
+        "llmSuggestions": [
+          "Evacuate non-essential personnel upwind to designated muster point and verify fixed detector loop telemetry with central control room.",
+          "Deploy portable multi-gas detector survey to establish 10 ppm H2S exclusion zone prior to manual maintenance authorization.",
+          "Require Type-C positive pressure SCBA apparatus for entry and verify calibration certificates of gas detection instrumentation."
+        ],
+        "status": "To Do",
+        "columnId": "col-1",
+        "createdAt": "2026-09-06T17:48:06.017Z"
+      },
+      {
+        "id": "worker-concern-1788716412400",
+        "title": "Fluid/Oil on Walkways / Ground — Oil spill of approximately 200 ml observed near workshop entrance. Area cleaned immediately.",
+        "description": "Quote: \"Oil spill of approximately 200 ml observed near workshop entrance\" | Failed Barrier: Safety Barriers & Containment Spill Kit | Observation: Oil spill of approximately 200 ml observed near workshop entrance. Area cleaned immediately.",
+        "tags": [
+          {
+            "label": "Fluid/Oil on Walkways / Ground",
+            "dotColor": "bg-blue-500"
+          },
+          {
+            "label": "SIF 15",
+            "dotColor": "bg-blue-500"
+          }
+        ],
+        "priority": "Low",
+        "date": "Sep 6",
+        "comments": 0,
+        "attachments": 0,
+        "avatars": [
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Oil spill of approximately 200 ml observed near workshop entrance. Area cleaned immediately.",
+        "hazard": "Fluid/Oil on Walkways / Ground",
+        "failed_barrier": "Safety Barriers & Containment Spill Kit",
+        "evidence_quote": "Oil spill of approximately 200 ml observed near workshop entrance",
+        "sif_score": 15,
+        "reportedAt": "Sep 6, 2026 • 11:10 PM IST",
+        "reporter": {
+          "name": "Lav Kumar",
+          "role": "HSE Field Safety Officer (Derrick Floor)",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+          "email": "lav@gmail.com",
+          "station": "Moran Rig #04 • Wellhead Section",
+          "radioChannel": "UHF CH-04",
+          "badgeId": "OIL-FLD-5542",
+          "phone": "+91 94350 44521"
+        },
+        "reviewer": null,
+        "llmSuggestions": [
+          "Issue immediate Stop Work Authority to halt unsafe operational conditions and clear personnel from line of fire.",
+          "Perform physical barrier audit to re-establish primary and secondary defense layers according to IOGP safety protocols.",
+          "Log safety intervention in OIL India HSE registry and conduct pre-job safety debrief before clearing work permit."
+        ],
+        "status": "To Do",
+        "columnId": "col-1",
+        "createdAt": "2026-09-06T17:40:12.400Z"
+      },
+      {
         "id": "worker-concern-1788695082997",
         "title": "Lifting & Mechanical Rigging Failure (Dropped Load) — During BOP stack installation on Moran Rig-04, the primary winch cable displayed severe wire strand fraying and unlatched secondary safety hook.",
         "description": "Quote: \"primary winch cable displayed severe wire strand fraying and unlatched secondary safety hook\" | Failed Barrier: Certified Lifting Slings & Drop Zone Exclusion Barricade | Observation: During BOP stack installation on Moran Rig-04, the primary winch cable displayed severe wire strand fraying and unlatched secondary safety hook.",
@@ -39,6 +133,7 @@
           "radioChannel": "UHF CH-04",
           "badgeId": "OIL-FLD-5542"
         },
+        "reviewer": null,
         "llmSuggestions": [
           "Immediately ground suspended load and barricade 1.5x crane swing drop-zone with high-visibility safety tape.",
           "Perform thorough visual inspection on wire rope slings, shackles, and load hooks for elongation, kinks, or missing safety latches.",
@@ -46,25 +141,331 @@
         ],
         "status": "To Do",
         "columnId": "col-1",
-        "createdAt": "2026-09-06T11:44:42.997Z",
-        "_id": "6a9d522ad33fba34a94f6b85",
-        "updatedAt": "2026-09-06T13:29:05.834Z",
-        "reviewer": {
-          "name": "Lav Kumar",
-          "role": "HSE Field Safety Officer (Derrick Floor)",
-          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-          "email": "lav@gmail.com",
-          "station": "Moran Rig #04 • Wellhead Section",
-          "radioChannel": "UHF CH-04",
-          "badgeId": "OIL-FLD-5542",
-          "phone": "+91 94350 44521"
-        }
+        "createdAt": "2026-09-06T11:44:42.997Z"
+      },
+      {
+        "id": "worker-concern-1788701200000",
+        "title": "Working at Height / Unlatched Harness — Monkey board monkey belt carabiner gate unlatched during casing running at 28m on Moran Rig-04.",
+        "description": "Quote: \"carabiner gate unlatched during casing running at 28m\" | Failed Barrier: 100% Tie-Off Full Body Fall Arrest System | Observation: Derrickman observed working on monkey board at 28m height without positive double-action locking carabiner engaged.",
+        "tags": [
+          {
+            "label": "Working at Height",
+            "dotColor": "bg-red-500"
+          },
+          {
+            "label": "SIF 92",
+            "dotColor": "bg-red-500"
+          }
+        ],
+        "priority": "High",
+        "date": "Sep 6",
+        "comments": 2,
+        "attachments": 1,
+        "avatars": [
+          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Derrickman observed working on monkey board at 28m height without positive double-action locking carabiner engaged.",
+        "hazard": "Working at Height / Fatal Fall Potential",
+        "failed_barrier": "100% Tie-Off Full Body Fall Arrest System & Inertia Reel",
+        "evidence_quote": "carabiner gate unlatched during casing running at 28m",
+        "sif_score": 92,
+        "reportedAt": "Sep 6, 2026 • 07:15 PM IST",
+        "reporter": {
+          "name": "Rahul Sharma",
+          "role": "Senior Drilling Safety Officer",
+          "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+          "email": "rahul.sharma@oilindia.in",
+          "station": "Moran Rig #04 • Derrick Substructure",
+          "radioChannel": "CH-3 (Drilling Operations)",
+          "badgeId": "OIL-FO-2041",
+          "phone": "+91 94351 88231"
+        },
+        "reviewer": null,
+        "llmSuggestions": [
+          "Invoke Stop Work Authority immediately; order derrickman to hook dual self-retracting lifelines prior to descending.",
+          "Perform mandatory inspection and quarantine of the defective harness lanyard assembly.",
+          "Conduct tool-box talk on 100% tie-off compliance before resuming tubular running."
+        ],
+        "status": "To Do",
+        "columnId": "col-1",
+        "createdAt": "2026-09-06T13:45:00.000Z"
+      },
+      {
+        "id": "worker-concern-1788688400000",
+        "title": "Unsafe Scaffolding / Missing Toe-Boards — Scaffolding erected around Naharkatiya OCS-1 crude separator unit lacks kickboards and green tag.",
+        "description": "Quote: \"separator unit scaffolding missing toe-boards and inspection tag\" | Failed Barrier: Scaffolding Inspection Tagging & Barrier Protection | Observation: Maintenance scaffolding around separator C-102 missing toe-boards; tools placed on edge posing dropped object hazard to ground crew.",
+        "tags": [
+          {
+            "label": "Dropped Objects / Work at Height",
+            "dotColor": "bg-yellow-500"
+          },
+          {
+            "label": "SIF 48",
+            "dotColor": "bg-indigo-500"
+          }
+        ],
+        "priority": "Medium",
+        "date": "Sep 5",
+        "comments": 1,
+        "attachments": 2,
+        "avatars": [
+          "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Maintenance scaffolding around separator C-102 missing toe-boards; tools placed on edge posing dropped object hazard to ground crew.",
+        "hazard": "Dropped Objects & Structural Integrity",
+        "failed_barrier": "Scaffolding Inspection Tagging & Barrier Protection",
+        "evidence_quote": "separator unit scaffolding missing toe-boards and inspection tag",
+        "sif_score": 48,
+        "reportedAt": "Sep 5, 2026 • 03:20 PM IST",
+        "reporter": {
+          "name": "Ananya Gogoi",
+          "role": "Environmental Compliance Officer",
+          "avatarUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+          "email": "ananya.gogoi@oilindia.in",
+          "station": "Naharkatiya OCS-1 • Separator Section",
+          "radioChannel": "CH-4 (Hazmat Control)",
+          "badgeId": "OIL-MGR-1044",
+          "phone": "+91 94353 99012"
+        },
+        "reviewer": null,
+        "llmSuggestions": [
+          "Tag out scaffold with red DO NOT USE card until inspected and certified by scaffold supervisor.",
+          "Install standard 150mm toe-boards and drop nets beneath the platform floor.",
+          "Establish 5m exclusion barricade below the working platform."
+        ],
+        "status": "To Do",
+        "columnId": "col-1",
+        "createdAt": "2026-09-05T09:50:00.000Z"
+      },
+      {
+        "id": "worker-concern-1788674200000",
+        "title": "Corridor Pipeline 4B Valve Corrosion & Slight Weep — Surface pitting and minor condensate seepage observed on Section 12 river crossing valve block.",
+        "description": "Quote: \"condensate seepage on river crossing valve block\" | Failed Barrier: Hydrocarbon Containment Barrier & Cathodic Protection | Observation: Ultrasonic gauge indicates 1.8mm wall loss on flange neck at Brahmaputra river crossing Sectional Valve 12.",
+        "tags": [
+          {
+            "label": "Hydrocarbon Containment / Pipeline",
+            "dotColor": "bg-rose-500"
+          },
+          {
+            "label": "SIF 38",
+            "dotColor": "bg-blue-500"
+          }
+        ],
+        "priority": "Medium",
+        "date": "Sep 5",
+        "comments": 0,
+        "attachments": 1,
+        "avatars": [
+          "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Ultrasonic gauge indicates 1.8mm wall loss on flange neck at Brahmaputra river crossing Sectional Valve 12 with minor condensate weep.",
+        "hazard": "Hydrocarbon Loss of Primary Containment",
+        "failed_barrier": "Hydrocarbon Containment Barrier & Cathodic Protection",
+        "evidence_quote": "condensate seepage on river crossing valve block",
+        "sif_score": 38,
+        "reportedAt": "Sep 5, 2026 • 11:15 AM IST",
+        "reporter": {
+          "name": "Debojit Saikia",
+          "role": "Rig Safety Inspector",
+          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+          "email": "debojit.saikia@oilindia.in",
+          "station": "Pipeline Corridor 4B • Section 12 River Crossing",
+          "radioChannel": "CH-3 (Field Inspection)",
+          "badgeId": "OIL-FO-2104",
+          "phone": "+91 94354 33219"
+        },
+        "reviewer": null,
+        "llmSuggestions": [
+          "Deploy spill containment tray with oil-absorbent pads to prevent river drainage.",
+          "Schedule immediate ultrasonic thickness scan and prepare composite wrap sleeve.",
+          "Verify cathodic protection impressed current levels at Test Post TP-12."
+        ],
+        "status": "To Do",
+        "columnId": "col-1",
+        "createdAt": "2026-09-05T05:45:00.000Z"
       }
     ]
   },
   {
     "id": "col-2",
     "title": "In Progress",
+    "cards": [
+      {
+        "id": "worker-concern-1788661000000",
+        "title": "High H2S Alarm Inactive at Duliajan Central GGS — Gas detector sensor GD-402 disabled during routine filter change without management of change (MOC).",
+        "description": "Quote: \"fixed H2S sensor disabled without MOC permit\" | Failed Barrier: Fixed Gas Detection & Emergency Shutdown (ESD) Interlock | Observation: Sensor GD-402 on compressor train B isolated without temporary portable detection station or bypass log entry.",
+        "tags": [
+          {
+            "label": "Toxic Gas / H2S Release",
+            "dotColor": "bg-red-500"
+          },
+          {
+            "label": "SIF 84",
+            "dotColor": "bg-red-500"
+          }
+        ],
+        "priority": "High",
+        "date": "Sep 4",
+        "comments": 3,
+        "attachments": 2,
+        "avatars": [
+          "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80",
+          "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Sensor GD-402 on compressor train B isolated without temporary portable detection station or bypass log entry.",
+        "hazard": "Toxic Gas Inhalation / SIF Precursor",
+        "failed_barrier": "Fixed Gas Detection & Emergency Shutdown (ESD) Interlock",
+        "evidence_quote": "fixed H2S sensor disabled without MOC permit",
+        "sif_score": 84,
+        "reportedAt": "Sep 4, 2026 • 04:30 PM IST",
+        "reporter": {
+          "name": "Arpita Das",
+          "role": "Lead Electrical Safety Officer",
+          "avatarUrl": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80",
+          "email": "arpita.das@oilindia.in",
+          "station": "Duliajan Central GGS • Compressor Station",
+          "radioChannel": "CH-2 (Process Control)",
+          "badgeId": "OIL-FO-2092",
+          "phone": "+91 94355 77123"
+        },
+        "reviewer": {
+          "name": "Priyanka Bora",
+          "role": "HSE Corporate Manager",
+          "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+          "email": "priyanka.bora@oilindia.in",
+          "station": "Duliajan Corporate HQ",
+          "radioChannel": "CH-1 (Emergency Command)",
+          "badgeId": "OIL-MGR-1002",
+          "phone": "+91 94350 11234"
+        },
+        "llmSuggestions": [
+          "Order immediate reconnect of GD-402 sensor and perform zero-span calibration check.",
+          "Post 24/7 dedicated watch officer with calibrated multi-gas monitor until system restored.",
+          "Initiate root cause investigation regarding unauthorized ESD bypass."
+        ],
+        "status": "In Progress",
+        "columnId": "col-2",
+        "createdAt": "2026-09-04T11:00:00.000Z"
+      },
+      {
+        "id": "worker-concern-1788653800000",
+        "title": "Digboi Field Station Substation Earth Pit High Resistance — Earth pit EP-04 measured 18.4 Ohms against maximum allowable 1.0 Ohm.",
+        "description": "Quote: \"earth pit measured 18.4 Ohms vs 1.0 Ohm limit\" | Failed Barrier: Hazardous Area Electrical Bonding & Static Earthing | Observation: Dried bentonite compound and broken copper tape bond discovered during pre-monsoon electrical audit.",
+        "tags": [
+          {
+            "label": "Electrical / Arc Flash",
+            "dotColor": "bg-yellow-500"
+          },
+          {
+            "label": "SIF 56",
+            "dotColor": "bg-emerald-600"
+          }
+        ],
+        "priority": "Medium",
+        "date": "Sep 4",
+        "comments": 1,
+        "attachments": 1,
+        "avatars": [
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+          "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Dried bentonite compound and broken copper tape bond discovered during pre-monsoon electrical audit at beam pump electrical panel.",
+        "hazard": "Arc Flash & Static Spark in Hydrocarbon Zone",
+        "failed_barrier": "Hazardous Area Electrical Bonding & Static Earthing",
+        "evidence_quote": "earth pit measured 18.4 Ohms vs 1.0 Ohm limit",
+        "sif_score": 56,
+        "reportedAt": "Sep 4, 2026 • 10:45 AM IST",
+        "reporter": {
+          "name": "Lav Kumar",
+          "role": "HSE Field Safety Officer (Derrick Floor)",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+          "email": "lav@gmail.com",
+          "station": "Digboi Field Station • Substation Area",
+          "radioChannel": "UHF CH-04",
+          "badgeId": "OIL-FLD-5542",
+          "phone": "+91 94350 44521"
+        },
+        "reviewer": {
+          "name": "Priyanka Bora",
+          "role": "HSE Corporate Manager",
+          "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+          "email": "priyanka.bora@oilindia.in",
+          "station": "Duliajan Corporate HQ",
+          "radioChannel": "CH-1 (Emergency Command)",
+          "badgeId": "OIL-MGR-1002",
+          "phone": "+91 94350 11234"
+        },
+        "llmSuggestions": [
+          "Treat earth pit with conductive carbon backfill and water rehydration salts immediately.",
+          "Install new 25x3mm copper earth bus link with cadweld fusion joints.",
+          "Re-measure earth impedance to guarantee < 1.0 Ohm under full load."
+        ],
+        "status": "In Progress",
+        "columnId": "col-2",
+        "createdAt": "2026-09-04T05:15:00.000Z"
+      },
+      {
+        "id": "worker-concern-1788642000000",
+        "title": "Kumchai Gas Field Manifold Flange Bolt Torquing Deficiency — Missing 2 studs on high pressure gas choke manifold rated 5,000 psi.",
+        "description": "Quote: \"missing 2 studs on 5,000 psi choke manifold\" | Failed Barrier: Wellhead Pressure Integrity & Flange Bolting Standards | Observation: Choke manifold inlet flange has only 6 out of 8 ASTM A193 B7 stud bolts secured.",
+        "tags": [
+          {
+            "label": "Wellhead Pressure Integrity",
+            "dotColor": "bg-red-500"
+          },
+          {
+            "label": "SIF 76",
+            "dotColor": "bg-red-500"
+          }
+        ],
+        "priority": "High",
+        "date": "Sep 3",
+        "comments": 2,
+        "attachments": 3,
+        "avatars": [
+          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
+          "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Choke manifold inlet flange has only 6 out of 8 ASTM A193 B7 stud bolts secured during pressure ramp up.",
+        "hazard": "Loss of Containment at High Pressure (5,000 psi)",
+        "failed_barrier": "Wellhead Pressure Integrity & Flange Bolting Standards",
+        "evidence_quote": "missing 2 studs on 5,000 psi choke manifold",
+        "sif_score": 76,
+        "reportedAt": "Sep 3, 2026 • 02:10 PM IST",
+        "reporter": {
+          "name": "Rahul Sharma",
+          "role": "Senior Drilling Safety Officer",
+          "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+          "email": "rahul.sharma@oilindia.in",
+          "station": "Kumchai Gas Field • Manifold Cluster",
+          "radioChannel": "CH-3 (Drilling Operations)",
+          "badgeId": "OIL-FO-2041",
+          "phone": "+91 94351 88231"
+        },
+        "reviewer": {
+          "name": "Priyanka Bora",
+          "role": "HSE Corporate Manager",
+          "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+          "email": "priyanka.bora@oilindia.in",
+          "station": "Duliajan Corporate HQ",
+          "radioChannel": "CH-1 (Emergency Command)",
+          "badgeId": "OIL-MGR-1002",
+          "phone": "+91 94350 11234"
+        },
+        "llmSuggestions": [
+          "Depressurize manifold header to safe bleed-off flare before mechanical torque intervention.",
+          "Install certified B7 studs with 2H nuts and cross-pattern hydraulic torquing to 320 ft-lbs.",
+          "Perform soap bubble leak check and 15-minute hydrostatic hold."
+        ],
+        "status": "In Progress",
+        "columnId": "col-2",
+        "createdAt": "2026-09-03T08:40:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "col-3",
+    "title": "Done",
     "cards": [
       {
         "id": "worker-concern-1788697475394",
@@ -82,8 +483,8 @@
         ],
         "priority": "High",
         "date": "Sep 6",
-        "comments": 0,
-        "attachments": 0,
+        "comments": 4,
+        "attachments": 2,
         "avatars": [
           "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
         ],
@@ -118,17 +519,182 @@
           "Deploy portable multi-gas detector survey to establish 10 ppm H2S exclusion zone prior to manual maintenance authorization.",
           "Require Type-C positive pressure SCBA apparatus for entry and verify calibration certificates of gas detection instrumentation."
         ],
-        "status": "In Progress",
-        "columnId": "col-2",
+        "status": "Done",
+        "columnId": "col-3",
         "createdAt": "2026-09-06T12:24:35.394Z",
-        "_id": "6a9d5b83d33fba34a94f6b8a",
-        "updatedAt": "2026-09-06T12:25:24.866Z"
+        "updatedAt": "2026-09-06T17:27:01.433Z"
+      },
+      {
+        "id": "worker-concern-1788631000000",
+        "title": "Naharkatiya OCS-1 Flare Pilot Igniter Malfunction — Automatic electronic ignition coil failed during high wind; flare unlit for 12 minutes.",
+        "description": "Quote: \"flare unlit for 12 minutes during high wind\" | Failed Barrier: Continuous Flare Pilot & Auto-Ignition Safeguard | Observation: Wind velocity 45 km/h extinguished pilot line; backup battery spark generator tripped.",
+        "tags": [
+          {
+            "label": "Thermal / Vapor Cloud Hazard",
+            "dotColor": "bg-orange-500"
+          },
+          {
+            "label": "SIF 65",
+            "dotColor": "bg-teal-700"
+          }
+        ],
+        "priority": "High",
+        "date": "Sep 2",
+        "comments": 2,
+        "attachments": 1,
+        "avatars": [
+          "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Wind velocity 45 km/h extinguished pilot line; backup battery spark generator tripped.",
+        "hazard": "Vapor Cloud Ignition / Uncontrolled Hydrocarbon Discharge",
+        "failed_barrier": "Continuous Flare Pilot & Auto-Ignition Safeguard",
+        "evidence_quote": "flare unlit for 12 minutes during high wind",
+        "sif_score": 65,
+        "reportedAt": "Sep 2, 2026 • 09:10 PM IST",
+        "reporter": {
+          "name": "Ananya Gogoi",
+          "role": "Environmental Compliance Officer",
+          "avatarUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+          "email": "ananya.gogoi@oilindia.in",
+          "station": "Naharkatiya OCS-1 • Flare Area",
+          "radioChannel": "CH-4 (Hazmat Control)",
+          "badgeId": "OIL-MGR-1044",
+          "phone": "+91 94353 99012"
+        },
+        "reviewer": {
+          "name": "Priyanka Bora",
+          "role": "HSE Corporate Manager",
+          "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+          "email": "priyanka.bora@oilindia.in",
+          "station": "Duliajan Corporate HQ",
+          "radioChannel": "CH-1 (Emergency Command)",
+          "badgeId": "OIL-MGR-1002",
+          "phone": "+91 94350 11234"
+        },
+        "llmSuggestions": [
+          "Activate secondary fuel gas pilot solenoid valve and verify UV optical flame scanner.",
+          "Replace degraded spark electrode assembly with high-wind rated ceramic tip.",
+          "Recalibrate thermal sensor loop to transmit immediate trip alarm to control room."
+        ],
+        "status": "Done",
+        "columnId": "col-3",
+        "createdAt": "2026-09-02T15:40:00.000Z",
+        "updatedAt": "2026-09-03T04:20:00.000Z"
+      },
+      {
+        "id": "worker-concern-1788622000000",
+        "title": "Kusijan Well #12 Mud Pump Relief Valve Tamper Pin Bent — Shear pin on 3,000 psi pump discharge line distorted, causing pressure relief malfunction.",
+        "description": "Quote: \"shear pin distorted on 3,000 psi discharge line\" | Failed Barrier: Mechanical Pressure Relief Valve & Overpressure Interlock | Observation: Routine pre-tour inspection identified deformed shear pin on Oteco relief valve.",
+        "tags": [
+          {
+            "label": "Overpressure / Hydraulic Burst",
+            "dotColor": "bg-yellow-500"
+          },
+          {
+            "label": "SIF 52",
+            "dotColor": "bg-teal-700"
+          }
+        ],
+        "priority": "Medium",
+        "date": "Sep 2",
+        "comments": 1,
+        "attachments": 2,
+        "avatars": [
+          "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Routine pre-tour inspection identified deformed shear pin on Oteco relief valve on Mud Pump #2.",
+        "hazard": "Hydraulic Line Rupture & High Pressure Fluid Injection",
+        "failed_barrier": "Mechanical Pressure Relief Valve & Overpressure Interlock",
+        "evidence_quote": "shear pin distorted on 3,000 psi discharge line",
+        "sif_score": 52,
+        "reportedAt": "Sep 2, 2026 • 11:20 AM IST",
+        "reporter": {
+          "name": "Debojit Saikia",
+          "role": "Rig Safety Inspector",
+          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+          "email": "debojit.saikia@oilindia.in",
+          "station": "Kusijan Well #12 • Mud Pump House",
+          "radioChannel": "CH-3 (Drilling Operations)",
+          "badgeId": "OIL-FO-2104",
+          "phone": "+91 94354 33219"
+        },
+        "reviewer": {
+          "name": "Priyanka Bora",
+          "role": "HSE Corporate Manager",
+          "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+          "email": "priyanka.bora@oilindia.in",
+          "station": "Duliajan Corporate HQ",
+          "radioChannel": "CH-1 (Emergency Command)",
+          "badgeId": "OIL-MGR-1002",
+          "phone": "+91 94350 11234"
+        },
+        "llmSuggestions": [
+          "Depressurize mud system and swap damaged shear pin with OEM factory-stamped pin.",
+          "Verify mud pump safety pop-off line discharge routing into containment ditch.",
+          "Log certificate of replacement in rig daily HSE tour sheet."
+        ],
+        "status": "Done",
+        "columnId": "col-3",
+        "createdAt": "2026-09-02T05:50:00.000Z",
+        "updatedAt": "2026-09-02T14:15:00.000Z"
+      },
+      {
+        "id": "worker-concern-1788610000000",
+        "title": "Moran Rig-04 Pipe Rack Pinch Point Hazard — Unchocked drill collars rolled 10cm on storage skid during truck unloading.",
+        "description": "Quote: \"unchocked drill collars rolled 10cm on storage skid\" | Failed Barrier: Pipe Chocking Wedges & Exclusion Zone Enforcement | Observation: Tubular handling team failed to position wooden wedge chocks prior to releasing lifting strops.",
+        "tags": [
+          {
+            "label": "Line of Fire / Tubular Handling",
+            "dotColor": "bg-blue-500"
+          },
+          {
+            "label": "SIF 24",
+            "dotColor": "bg-rose-400"
+          }
+        ],
+        "priority": "Low",
+        "date": "Sep 1",
+        "comments": 1,
+        "attachments": 0,
+        "avatars": [
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Tubular handling team failed to position wooden wedge chocks prior to releasing lifting strops on pipe rack #3.",
+        "hazard": "Crush / Pinch Injury in Pipe Yard",
+        "failed_barrier": "Pipe Chocking Wedges & Exclusion Zone Enforcement",
+        "evidence_quote": "unchocked drill collars rolled 10cm on storage skid",
+        "sif_score": 24,
+        "reportedAt": "Sep 1, 2026 • 02:40 PM IST",
+        "reporter": {
+          "name": "Lav Kumar",
+          "role": "HSE Field Safety Officer (Derrick Floor)",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+          "email": "lav@gmail.com",
+          "station": "Moran Rig #04 • Pipe Yard Section",
+          "radioChannel": "UHF CH-04",
+          "badgeId": "OIL-FLD-5542",
+          "phone": "+91 94350 44521"
+        },
+        "reviewer": {
+          "name": "Priyanka Bora",
+          "role": "HSE Corporate Manager",
+          "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+          "email": "priyanka.bora@oilindia.in",
+          "station": "Duliajan Corporate HQ",
+          "radioChannel": "CH-1 (Emergency Command)",
+          "badgeId": "OIL-MGR-1002",
+          "phone": "+91 94350 11234"
+        },
+        "llmSuggestions": [
+          "Mandate heavy rubberized safety chocks on both sides of every tier.",
+          "Enforce line of fire standing rules during truck crane offloading.",
+          "Conduct field refresher on safe tubular stacking geometries."
+        ],
+        "status": "Done",
+        "columnId": "col-3",
+        "createdAt": "2026-09-01T09:10:00.000Z",
+        "updatedAt": "2026-09-01T16:30:00.000Z"
       }
     ]
-  },
-  {
-    "id": "col-3",
-    "title": "Done",
-    "cards": []
   }
 ]

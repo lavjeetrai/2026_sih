@@ -190,8 +190,8 @@ export function CardDetailModal({
     },
   ];
 
-  // Reviewing HSE Manager Profile Data
-  const managerName = currentManager?.name || card.reviewer?.name || "Priyanka Bora";
+  // Reviewing HSE Manager Profile Data (if assigned)
+  const managerName = card.reviewer?.name || "";
   const managerInitials =
     managerName
       .split(" ")
@@ -201,34 +201,32 @@ export function CardDetailModal({
       .join("")
       .toUpperCase() || "MGR";
   const managerAvatar =
-    currentManager?.avatarUrl ||
     card.reviewer?.avatarUrl ||
     "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80";
-  const managerStation = currentManager?.station || card.reviewer?.station || "Duliajan Corporate HQ";
-  const managerBadge = currentManager?.badgeId || card.reviewer?.badgeId || "OIL-MGR-1002";
+  const managerStation = card.reviewer?.station || "Duliajan Corporate HQ";
+  const managerBadge = card.reviewer?.badgeId || "OIL-MGR";
   const managerRole =
-    currentManager?.designation ||
     card.reviewer?.role ||
-    "Chief General Manager (Process Safety & SIF Control)";
+    "HSE Operations Manager";
   const managerBio = `${managerRole}. Authorized HSE Manager approving barrier verifications, SIF mitigation controls, and stage audits across ${managerStation}.`;
 
   const managerSocials: SocialLink[] = [
     {
       id: "radio",
       url: "#",
-      label: `Command Freq: ${currentManager?.radioChannel || card.reviewer?.radioChannel || "COMMAND CH-01"}`,
+      label: `Command Freq: ${card.reviewer?.radioChannel || "COMMAND CH-01"}`,
       icon: <Radio className="h-4 w-4" />,
     },
     {
       id: "phone",
-      url: `tel:${currentManager?.phone || card.reviewer?.phone || "+913742804501"}`,
-      label: `Direct: ${currentManager?.phone || card.reviewer?.phone || "+91 374 280 4501"}`,
+      url: `tel:${card.reviewer?.phone || "+913742804501"}`,
+      label: `Direct: ${card.reviewer?.phone || "+91 374 280 4501"}`,
       icon: <Phone className="h-4 w-4" />,
     },
     {
       id: "email",
-      url: `mailto:${currentManager?.email || card.reviewer?.email || "priyanka@oilindia.in"}`,
-      label: `Email: ${currentManager?.email || card.reviewer?.email || "priyanka@oilindia.in"}`,
+      url: `mailto:${card.reviewer?.email || "hse@oilindia.in"}`,
+      label: `Email: ${card.reviewer?.email || "hse@oilindia.in"}`,
       icon: <Mail className="h-4 w-4" />,
     },
   ];
@@ -404,20 +402,38 @@ export function CardDetailModal({
                   </p>
                 </div>
 
-                {/* Reviewing HSE Manager Compact Profile Card */}
-                <CompactProfileCard
-                  badgeTitle="Reviewing HSE Manager"
-                  badgeId={managerBadge}
-                  badgeIcon={<ShieldCheck size={14} className="text-blue-600" />}
-                  name={managerName}
-                  role={managerRole}
-                  location={`${managerStation} • Verified Clearances`}
-                  bio={`HSE Process Lead • Reviewing barrier restoration, work-order clearances, and audit workflows.`}
-                  avatarSrc={managerAvatar}
-                  avatarFallback={managerInitials}
-                  socials={managerSocials}
-                  themeVariant="blue"
-                />
+                {/* Reviewing HSE Manager Compact Profile Card / Pending Assignment */}
+                {card.reviewer ? (
+                  <CompactProfileCard
+                    badgeTitle="Reviewing HSE Manager"
+                    badgeId={managerBadge}
+                    badgeIcon={<ShieldCheck size={14} className="text-blue-600" />}
+                    name={managerName}
+                    role={managerRole}
+                    location={`${managerStation} • Active Reviewer`}
+                    bio={`HSE Process Lead • Reviewing barrier restoration, work-order clearances, and audit workflows.`}
+                    avatarSrc={managerAvatar}
+                    avatarFallback={managerInitials}
+                    socials={managerSocials}
+                    themeVariant="blue"
+                  />
+                ) : (
+                  <div className="bg-white border border-dashed border-neutral-300 rounded-xl p-4 shadow-2xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
+                        Reviewing HSE Manager
+                      </span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                        Pending Assignment
+                      </span>
+                    </div>
+                    <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-200/80 flex items-center justify-center">
+                      <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
+                        AWAITING FOR MANAGER REVIEW
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Right Column (Structured AI Extraction & Recommendations) - 7 cols */}

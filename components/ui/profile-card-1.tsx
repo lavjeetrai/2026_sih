@@ -483,9 +483,7 @@ export function UserProfileOverlay({
   onUpdateUser,
   sidebarOpen = true,
 }: UserProfileOverlayProps) {
-  if (!isOpen || !user) return null;
-
-  const isManager = user.role === "manager";
+  const isManager = user?.role === "manager";
 
   // Edit Mode state
   const [isEditing, setIsEditing] = useState(false);
@@ -494,15 +492,15 @@ export function UserProfileOverlay({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Editable form fields
-  const [name, setName] = useState(user.name || "");
+  const [name, setName] = useState(user?.name || "");
   const [designation, setDesignation] = useState(
-    user.designation || (isManager ? "Chief General Manager (Process Safety)" : "HSE Field Safety Officer")
+    user?.designation || (isManager ? "Chief General Manager (Process Safety)" : "HSE Field Safety Officer")
   );
   const [station, setStation] = useState(
-    user.station || (isManager ? "Duliajan Directorate" : "Moran Rig #04 • Wellhead Section")
+    user?.station || (isManager ? "Duliajan Directorate" : "Moran Rig #04 • Wellhead Section")
   );
-  const [radioChannel, setRadioChannel] = useState(user.radioChannel || "UHF CH-04");
-  const [phone, setPhone] = useState(user.phone || "+91 94350 44521");
+  const [radioChannel, setRadioChannel] = useState(user?.radioChannel || "UHF CH-04");
+  const [phone, setPhone] = useState(user?.phone || "+91 94350 44521");
 
   useEffect(() => {
     if (user) {
@@ -523,6 +521,8 @@ export function UserProfileOverlay({
       setPhone(user.phone || "+91 94350 44521");
     }
   }, [user]);
+
+  if (!isOpen || !user) return null;
 
   const handleSaveProfile = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();

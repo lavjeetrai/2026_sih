@@ -498,8 +498,8 @@ export function OfficerConcernHistory({ user, onLogNewConcern }: OfficerConcernH
                         </div>
                       </div>
 
-                      {/* 3. Reviewing HSE Manager — rendered as a profile card, only when assigned */}
-                      {card.reviewer && (
+                      {/* 3. Reviewing HSE Manager — rendered as a profile card only when assigned, otherwise shows Awaiting Review */}
+                      {card.reviewer ? (
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-700">
                             <span>Reviewing HSE Manager</span>
@@ -519,7 +519,6 @@ export function OfficerConcernHistory({ user, onLogNewConcern }: OfficerConcernH
                                   ? `Overseeing safety, barrier control, and corrective actions at ${card.reviewer.station}.`
                                   : "Overseeing safety, barrier control, and corrective actions."
                               }
-
                               metaDetails={[
                                 ...(card.reviewer.station
                                   ? [{ label: "Station", value: card.reviewer.station }]
@@ -531,8 +530,18 @@ export function OfficerConcernHistory({ user, onLogNewConcern }: OfficerConcernH
                                   ? [{ label: "Email", value: card.reviewer.email }]
                                   : []),
                               ]}
-
                             />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-700">
+                            <span>Reviewing HSE Manager</span>
+                          </div>
+                          <div className="p-3.5 bg-neutral-50 rounded-xl border border-dashed border-neutral-300 text-center flex items-center justify-center">
+                            <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
+                              AWAITING FOR MANAGER REVIEW
+                            </span>
                           </div>
                         </div>
                       )}

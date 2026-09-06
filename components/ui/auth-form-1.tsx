@@ -336,9 +336,6 @@ function AuthSignIn({ onForgotPassword, onSignUp, onLoginSuccess, defaultRole = 
       className="p-8"
     >
       <div className="mb-6 text-center">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-full text-[11px] font-semibold text-amber-800 mb-2 font-mono">
-          <span>OIL INDIA LIMITED • HSE SECURE ACCESS</span>
-        </div>
         <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">Welcome Back</h1>
         <p className="mt-1 text-xs text-muted-foreground">Sign in to your authorized safety account</p>
       </div>
@@ -689,9 +686,6 @@ function AuthSignUp({ onSignIn, defaultRole = "worker" }: AuthSignUpProps) {
       className="p-8"
     >
       <div className="mb-5 text-center">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 border border-neutral-200 rounded-full text-[11px] font-semibold text-neutral-700 mb-2 font-mono">
-          <span>OIL PERSONNEL ONBOARDING REQUEST</span>
-        </div>
         <h1 className="text-2xl font-bold text-foreground tracking-tight">Create Account Request</h1>
         <p className="mt-1 text-xs text-muted-foreground">
           Enter your official oilfield credentials. All requests require verification by an existing HSE Manager.
