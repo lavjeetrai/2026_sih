@@ -127,6 +127,35 @@ export function mapToLifeSavingRule(
 ): LifeSavingRule {
   const combined = `${hazard || ""} ${barrier || ""} ${text || ""}`.toLowerCase();
 
+  // Direct exact rule name checks (matches Modal fine-tuned SLM outputs)
+  if (combined.includes("energy isolation") || combined.includes("loto")) {
+    return IOGP_LIFE_SAVING_RULES[3];
+  }
+  if (combined.includes("working at heights") || combined.includes("work at height") || combined.includes("heights")) {
+    return IOGP_LIFE_SAVING_RULES[1];
+  }
+  if (combined.includes("confined space")) {
+    return IOGP_LIFE_SAVING_RULES[6];
+  }
+  if (combined.includes("mechanical lifting") || combined.includes("safe lifting")) {
+    return IOGP_LIFE_SAVING_RULES[4];
+  }
+  if (combined.includes("bypassing safety controls") || combined.includes("safety controls")) {
+    return IOGP_LIFE_SAVING_RULES[2];
+  }
+  if (combined.includes("line of fire")) {
+    return IOGP_LIFE_SAVING_RULES[7];
+  }
+  if (combined.includes("hot work")) {
+    return IOGP_LIFE_SAVING_RULES[8];
+  }
+  if (combined.includes("toxic gas") || combined.includes("h2s")) {
+    return IOGP_LIFE_SAVING_RULES[5];
+  }
+  if (combined.includes("driving") || combined.includes("vehicle")) {
+    return IOGP_LIFE_SAVING_RULES[9];
+  }
+
   // 1. Work at Height
   if (
     combined.includes("height") ||

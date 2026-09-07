@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { generateHseSuggestions } from "@/lib/ollama";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // 60s max execution for Vercel serverless
 
 /**
  * Endpoint: POST /api/suggest

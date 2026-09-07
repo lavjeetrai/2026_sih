@@ -332,6 +332,22 @@ export function CardDetailModal({
                       </span>
                     );
                   })}
+                  {card.inference_engine && (
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold border ${
+                        card.inference_engine === "modal"
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                          : "bg-blue-50 text-blue-800 border-blue-200"
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          card.inference_engine === "modal" ? "bg-emerald-500" : "bg-blue-500"
+                        }`}
+                      />
+                      {card.inference_engine === "modal" ? "Fine-Tuned SLM (Modal)" : "Edge Ollama (Local)"}
+                    </span>
+                  )}
                 </div>
                 <h2 className="text-xl md:text-2xl font-bold text-neutral-900 tracking-tight leading-snug">
                   {card.title.endsWith("...") && card.observation

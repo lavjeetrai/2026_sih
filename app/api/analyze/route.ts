@@ -1,30 +1,50 @@
 import { NextResponse } from "next/server";
-import { analyzeSafetyObservation, checkOllamaStatus } from "@/lib/ollama";
+import { analyzeSafetyObservation, checkAiStatus } from "@/lib/ollama";
 import { addConcernFromWorker } from "@/lib/concerns";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // 60 seconds max execution time for Vercel serverless
 
 /**
  * Health check endpoint: GET /api/analyze
- * Returns Ollama connectivity and model registration status.
+ * Returns dual-engine status (Fine-Tuned Modal SLM & Local Ollama) and active routing.
  */
 export async function GET() {
-  const status = await checkOllamaStatus();
-  return NextResponse.json(status, {
-    status: status.online ? 200 : 503,
-  });
+  const status = await checkAiStatus();
+
+  return NextResponse.json(
+    {
+      online: status.online,
+      targetModelFound:
+        status.activeEngine === "modal"
+          ? status.modal.online
+          : status.ollama.targetModelFound,
+      model:
+        status.activeEngine === "modal"
+          ? "Fine-Tuned SLM (Modal Cloud)"
+          : status.ollama.model,
+      activeEngine: status.activeEngine,
+      preferredEngine: status.preferredEngine,
+      environment: status.environment,
+      modal: status.modal,
+      ollama: status.ollama,
+    },
+    {
+      status: status.online ? 200 : 503,
+    }
+  );
 }
 
 /**
  * Extraction endpoint: POST /api/analyze
- * Body: { observation: string, autoDispatch?: boolean }
- * Analyzes observation with fine-tuned Ollama model and automatically dispatches
+ * Body: { observation: string, autoDispatch?: boolean, engine?: "modal" | "ollama" | "auto", reporter?: any }
+ * Analyzes observation using Modal Cloud SLM or Local Ollama and automatically dispatches
  * the concern to the Manager Portal's 'To Do' board.
  */
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { observation, autoDispatch = true, reporter } = body;
+    const { observation, autoDispatch = true, reporter, engine } = body;
 
     if (!observation || typeof observation !== "string" || !observation.trim()) {
       return NextResponse.json(
@@ -36,7 +56,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const result = await analyzeSafetyObservation(observation);
+    const result = await analyzeSafetyObservation(observation, engine);
 
     // Intelligently forward worker concern to Manager Portal's 'To Do' board
     let concernCard = null;
@@ -48,6 +68,10 @@ export async function POST(req: Request) {
           failed_barrier: result.failed_barrier,
           evidence_quote: result.evidence_quote,
           sif_score: result.sif_score,
+          sif_potential: result.sif_potential,
+          iogp_rule: result.iogp_life_saving_rule,
+          critical_barrier_failure: result.critical_barrier_failure,
+          inference_engine: result.engine,
           reporter,
         });
       } catch (dispatchErr) {
