@@ -40,6 +40,10 @@ export interface CardData {
   failed_barrier?: string;
   evidence_quote?: string;
   sif_score?: number;
+  sif_potential?: boolean;
+  iogp_rule?: string;
+  critical_barrier_failure?: boolean;
+  inference_engine?: "modal" | "ollama" | "fallback";
   reporter?: ReporterInfo;
   reviewer?: ReporterInfo;
   reportedAt?: string;
@@ -68,6 +72,10 @@ export interface WorkerConcernPayload {
   failed_barrier?: string;
   evidence_quote?: string;
   sif_score?: number;
+  sif_potential?: boolean;
+  iogp_rule?: string;
+  critical_barrier_failure?: boolean;
+  inference_engine?: "modal" | "ollama" | "fallback";
   reporter?: string | Partial<ReporterInfo>;
 }
 
@@ -422,6 +430,10 @@ export async function addConcernFromWorker(payload: WorkerConcernPayload): Promi
     failed_barrier: payload.failed_barrier,
     evidence_quote: payload.evidence_quote,
     sif_score: score,
+    sif_potential: payload.sif_potential,
+    iogp_rule: payload.iogp_rule,
+    critical_barrier_failure: payload.critical_barrier_failure,
+    inference_engine: payload.inference_engine,
     reportedAt: formattedTime,
     reporter:
       typeof payload.reporter === "object" && payload.reporter

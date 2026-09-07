@@ -114,37 +114,51 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
     const [lastAnalyzedObservation, setLastAnalyzedObservation] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
     const [referenceCode, setReferenceCode] = useState<string>("");
-    const [ollamaStatus, setOllamaStatus] = useState<{
+    const [engineStatus, setEngineStatus] = useState<{
         checked: boolean;
         online: boolean;
+        activeEngine: "modal" | "ollama";
         model: string;
+        modalOnline: boolean;
+        ollamaOnline: boolean;
     }>({
         checked: false,
         online: false,
-        model: "safety-phi3",
+        activeEngine: "modal",
+        model: "Fine-Tuned SLM (Modal Cloud)",
+        modalOnline: false,
+        ollamaOnline: false,
     });
+    const [selectedEngine, setSelectedEngine] = useState<"auto" | "modal" | "ollama">("auto");
+    const [lastAnalyzedEngine, setLastAnalyzedEngine] = useState<string>("");
 
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({
         minHeight: 60,
         maxHeight: 200,
     });
 
-    // Check Ollama status on mount
+    // Check dual-engine status on mount
     useEffect(() => {
         async function fetchStatus() {
             try {
                 const res = await fetch("/api/analyze", { method: "GET" });
                 const data = await res.json();
-                setOllamaStatus({
+                setEngineStatus({
                     checked: true,
-                    online: data.online && data.targetModelFound,
-                    model: data.model || "safety-phi3",
+                    online: Boolean(data.online),
+                    activeEngine: data.activeEngine || (data.modal?.online ? "modal" : "ollama"),
+                    model: data.model || "Fine-Tuned SLM",
+                    modalOnline: Boolean(data.modal?.online),
+                    ollamaOnline: Boolean(data.ollama?.online),
                 });
             } catch {
-                setOllamaStatus({
+                setEngineStatus({
                     checked: true,
                     online: false,
-                    model: "safety-phi3",
+                    activeEngine: "modal",
+                    model: "Fine-Tuned SLM",
+                    modalOnline: false,
+                    ollamaOnline: false,
                 });
             }
         }
@@ -184,6 +198,7 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
                 },
                 body: JSON.stringify({
                     observation: query,
+                    engine: selectedEngine === "auto" ? undefined : selectedEngine,
                     reporter: reporterPayload,
                 }),
             });
@@ -192,6 +207,10 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
 
             if (!res.ok || !json.success) {
                 throw new Error(json.error || "Failed to log concern.");
+            }
+
+            if (json.data?.engine) {
+                setLastAnalyzedEngine(json.data.engine === "modal" ? "Modal Cloud SLM" : "Local Ollama");
             }
 
             // Generate clean reference code
@@ -256,6 +275,42 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
                         <p className="text-sm text-neutral-500 max-w-xl">
                             Log unsafe acts, unsafe conditions, or field observations. Concerns are automatically analyzed and forwarded to the HSE Manager for resolution.
                         </p>
+
+                        {/* AI Engine Status & Smart Switcher */}
+                        <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-neutral-50/90 hover:bg-neutral-100/90 border border-neutral-200/80 shadow-2xs transition-all">
+                                <span
+                                    className={cn(
+                                        "w-2 h-2 rounded-full shrink-0",
+                                        engineStatus.online ? "bg-emerald-500 animate-pulse" : "bg-red-400"
+                                    )}
+                                />
+                                <span className="text-[11px] text-neutral-500 font-medium">Model Engine:</span>
+                                <select
+                                    value={selectedEngine}
+                                    onChange={(e) => setSelectedEngine(e.target.value as "auto" | "modal" | "ollama")}
+                                    className="bg-transparent text-[11px] font-semibold text-neutral-800 cursor-pointer focus:outline-none pr-1"
+                                    disabled={isLoading}
+                                    title="Switch AI Inference Engine"
+                                >
+                                    <option value="auto">
+                                        ⚡ Auto-Route ({engineStatus.activeEngine === "modal" ? "Modal Cloud SLM" : "Local Ollama"})
+                                    </option>
+                                    <option value="modal">
+                                        ☁️ Fine-Tuned SLM (Modal Cloud) {engineStatus.modalOnline ? "• Live" : "• Offline"}
+                                    </option>
+                                    <option value="ollama">
+                                        💻 Edge Ollama (safety-phi3) {engineStatus.ollamaOnline ? "• Live" : "• Offline"}
+                                    </option>
+                                </select>
+                            </div>
+                            {lastAnalyzedEngine && (
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] bg-emerald-50 border border-emerald-200 text-emerald-700 font-medium animate-in fade-in duration-300">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    <span>Analyzed via {lastAnalyzedEngine}</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Input Box */}
