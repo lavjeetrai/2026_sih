@@ -43,5 +43,50 @@
     "approvedByManagerDesignation": "Chief General Manager (Process Safety & SIF Control)",
     "approvedAt": "2026-09-06T12:12:56.476Z",
     "remarks": "Verified credentials and assigned station clearance at Moran Rig #04 • Wellhead Section."
+  },
+  {
+    "candidateName": "Sai",
+    "candidateEmail": "saivaibhav5594@gmail.com",
+    "candidateBadgeId": "lklhjfihf",
+    "candidateStation": "ihqdfihjf",
+    "candidateRadioChannel": "popjfsijfi",
+    "candidatePhone": "kqghjgigjejgfij",
+    "grantedRole": "worker",
+    "approvedByManagerName": "Lav Kumar",
+    "approvedByManagerBadge": "OIL-FLD-5542",
+    "approvedByManagerEmail": "lav@gmail.com",
+    "approvedByManagerDesignation": "HSE Field Safety Officer (Derrick Floor)",
+    "approvedAt": "2026-09-07T09:34:20.168Z",
+    "remarks": "Verified credentials and assigned station clearance at ihqdfihjf."
+  },
+  {
+    "candidateName": "New Field Officer",
+    "candidateEmail": "test_officer_1788780941423@oilindia.in",
+    "candidateBadgeId": "OIL-NEW-9999",
+    "candidateStation": "Moran Rig #04",
+    "candidateRadioChannel": "UHF CH-04",
+    "candidatePhone": "+91 94350 99999",
+    "grantedRole": "worker",
+    "approvedByManagerName": "Lav Kumar",
+    "approvedByManagerBadge": "OIL-FLD-5542",
+    "approvedByManagerEmail": "lav@gmail.com",
+    "approvedByManagerDesignation": "HSE Field Safety Officer (Derrick Floor)",
+    "approvedAt": "2026-09-07T18:02:18.428Z",
+    "remarks": "Verified credentials and assigned station clearance at Moran Rig #04."
+  },
+  {
+    "candidateName": "New Field Officer",
+    "candidateEmail": "test_officer_1788808445570@oilindia.in",
+    "candidateBadgeId": "OIL-NEW-9999",
+    "candidateStation": "Moran Rig #04",
+    "candidateRadioChannel": "UHF CH-04",
+    "candidatePhone": "+91 94350 99999",
+    "grantedRole": "worker",
+    "approvedByManagerName": "Lav Kumar",
+    "approvedByManagerBadge": "OIL-FLD-5542",
+    "approvedByManagerEmail": "lav@gmail.com",
+    "approvedByManagerDesignation": "HSE Field Safety Officer (Derrick Floor)",
+    "approvedAt": "2026-09-07T19:26:18.612Z",
+    "remarks": "Verified credentials and assigned station clearance at Moran Rig #04."
   }
 ]

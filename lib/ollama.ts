@@ -103,10 +103,28 @@ export async function checkOllamaStatus(): Promise<OllamaHealthStatus> {
   }
 }
 
+// In-memory response cache to prevent redundant Modal SLM token consumption
+interface CachedInference {
+  result: SafetyAnalysisResult;
+  timestamp: number;
+}
+const MODAL_INFERENCE_CACHE = new Map<string, CachedInference>();
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24-hour cache
+const MAX_CACHE_ENTRIES = 500;
+
+// Cached health check to avoid network chatter
+let lastModalHealth: { status: ModalHealthStatus; timestamp: number } | null = null;
+const HEALTH_CACHE_TTL_MS = 60 * 1000; // 60 seconds
+
 /**
  * Checks connection to the fine-tuned Modal Cloud SLM endpoint.
+ * Cached for 60 seconds to avoid unnecessary network pings.
  */
 export async function checkModalStatus(): Promise<ModalHealthStatus> {
+  if (lastModalHealth && Date.now() - lastModalHealth.timestamp < HEALTH_CACHE_TTL_MS) {
+    return lastModalHealth.status;
+  }
+
   try {
     const controller = new AbortController();
     // 6s ping test
@@ -122,27 +140,33 @@ export async function checkModalStatus(): Promise<ModalHealthStatus> {
     // FastAPI returns 405 Method Not Allowed for GET on POST-only endpoints,
     // which confirms the server and container are live and operational!
     if (res.ok || res.status === 405 || res.status === 200 || res.status === 400) {
-      return {
+      const status: ModalHealthStatus = {
         online: true,
         url: MODAL_BASE_URL,
         modelName: "Fine-Tuned SLM (Modal Cloud)",
       };
+      lastModalHealth = { status, timestamp: Date.now() };
+      return status;
     }
 
-    return {
+    const errorStatus: ModalHealthStatus = {
       online: false,
       url: MODAL_BASE_URL,
       modelName: "Fine-Tuned SLM (Modal Cloud)",
       error: `Modal returned HTTP ${res.status}: ${res.statusText}`,
     };
+    lastModalHealth = { status: errorStatus, timestamp: Date.now() };
+    return errorStatus;
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Unable to connect to Modal SLM";
-    return {
+    const errorStatus: ModalHealthStatus = {
       online: false,
       url: MODAL_BASE_URL,
       modelName: "Fine-Tuned SLM (Modal Cloud)",
       error: msg,
     };
+    lastModalHealth = { status: errorStatus, timestamp: Date.now() };
+    return errorStatus;
   }
 }
 
@@ -198,13 +222,31 @@ export async function checkAiStatus(): Promise<AiSystemStatus> {
 
 /**
  * Analyzes observation using the fine-tuned SLM deployed on Modal.
+ * Optimized with in-memory caching and compressed single-key payloads to conserve tokens.
  */
 export async function analyzeWithModal(
   observation: string
 ): Promise<SafetyAnalysisResult> {
-  const trimmed = observation?.trim();
-  if (!trimmed) {
+  // 1. Normalize and compress whitespace to minimize token footprint
+  const cleaned = observation
+    ?.replace(/\s+/g, " ")
+    ?.trim();
+
+  if (!cleaned) {
     throw new Error("Observation text is required.");
+  }
+
+  // 2. Truncate overly long text (safety observations do not need >800 chars for classification)
+  const optimizedInput = cleaned.length > 800 ? cleaned.slice(0, 800) : cleaned;
+  const cacheKey = optimizedInput.toLowerCase();
+
+  // 3. Check memory cache (0 tokens consumed on repeat queries)
+  const cached = MODAL_INFERENCE_CACHE.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return {
+      ...cached.result,
+      evidence_quote: cleaned,
+    };
   }
 
   const controller = new AbortController();
@@ -218,11 +260,9 @@ export async function analyzeWithModal(
       headers: {
         "Content-Type": "application/json",
       },
-      // Pass multiple synonymous keys for complete server compatibility
+      // Send ONLY single concise 'log' key to prevent token duplication
       body: JSON.stringify({
-        log: trimmed,
-        text: trimmed,
-        observation: trimmed,
+        log: optimizedInput,
       }),
       signal: controller.signal,
     });
@@ -293,10 +333,10 @@ export async function analyzeWithModal(
       ? data.critical_barrier_failure
       : Boolean(failed_barrier);
 
-  return {
+  const result: SafetyAnalysisResult = {
     hazard,
     failed_barrier,
-    evidence_quote: trimmed,
+    evidence_quote: cleaned,
     sif_score: sifScore,
     sif_potential,
     iogp_life_saving_rule: iogpRule,
@@ -307,6 +347,18 @@ export async function analyzeWithModal(
     engine: "modal",
     raw: data,
   };
+
+  // Cache response to save tokens on repeated / demo inputs
+  if (MODAL_INFERENCE_CACHE.size >= MAX_CACHE_ENTRIES) {
+    const oldestKey = MODAL_INFERENCE_CACHE.keys().next().value;
+    if (oldestKey) MODAL_INFERENCE_CACHE.delete(oldestKey);
+  }
+  MODAL_INFERENCE_CACHE.set(cacheKey, {
+    result,
+    timestamp: Date.now(),
+  });
+
+  return result;
 }
 
 /**
