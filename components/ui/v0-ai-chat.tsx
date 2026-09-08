@@ -12,15 +12,11 @@ import {
     X,
     Check,
     Globe,
-    Sparkles,
-    Play,
-    Pause,
-    Trash2,
-    AudioWaveform,
 } from "lucide-react";
 import { AnimatedTicket } from "@/components/ui/ticket-confirmation-card";
 import { type UserSessionData } from "@/components/ui/auth-form-1";
-import { SiriWave, type SiriWaveVariant } from "@/components/ui/siri-wave";
+import { SiriWave } from "@/components/ui/siri-wave";
+import { LumaSpin } from "@/components/ui/luma-spin";
 
 interface ISpeechRecognitionEvent {
     resultIndex: number;
@@ -45,6 +41,8 @@ interface ISpeechRecognition {
     lang: string;
     start: () => void;
     stop: () => void;
+    abort: () => void;
+    onstart?: () => void;
     onresult: (event: ISpeechRecognitionEvent) => void;
     onerror: (event: ISpeechRecognitionErrorEvent) => void;
     onend: () => void;
@@ -166,23 +164,30 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
 
     // Voice & SiriWave Modal State
     const [isVoiceOpen, setIsVoiceOpen] = useState(false);
-    const [isRecording, setIsRecording] = useState(false);
     const [speechTranscript, setSpeechTranscript] = useState("");
     const [interimTranscript, setInterimTranscript] = useState("");
     const [voiceDuration, setVoiceDuration] = useState(0);
     const [voiceNoteUrl, setVoiceNoteUrl] = useState<string | null>(null);
     const [selectedLanguage, setSelectedLanguage] = useState<"en-IN" | "hi-IN" | "en-US">("en-IN");
-    const [waveVariant, setWaveVariant] = useState<SiriWaveVariant>("wave");
     const [micError, setMicError] = useState<string | null>(null);
-    const [isPlayingPreview, setIsPlayingPreview] = useState(false);
+    const [audioLevel, setAudioLevel] = useState(1.0);
 
     const recognitionRef = useRef<ISpeechRecognition | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const mediaStreamRef = useRef<MediaStream | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
-    const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
+    const restartTimerRef = useRef<NodeJS.Timeout | null>(null);
     const isRecordingRef = useRef(false);
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const analyserRef = useRef<AnalyserNode | null>(null);
+    const animFrameRef = useRef<number | null>(null);
+
+    // Multi-cycle transcript accumulation refs (prevent speech loss across silences)
+    const initialValueBeforeVoiceRef = useRef("");
+    const accumulatedFinalRef = useRef("");
+    const currentCycleFinalRef = useRef("");
+    const interimTranscriptRef = useRef("");
 
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({
         minHeight: 60,
@@ -193,6 +198,13 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
     useEffect(() => {
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
+            if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
+            if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+            if (audioContextRef.current) {
+                try {
+                    audioContextRef.current.close();
+                } catch {}
+            }
             if (recognitionRef.current) {
                 try {
                     recognitionRef.current.stop();
@@ -204,137 +216,39 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
         };
     }, []);
 
-    // Start Voice Input & SiriWave
-    const startVoiceInput = async (lang = selectedLanguage) => {
-        setMicError(null);
-        setSpeechTranscript("");
-        setInterimTranscript("");
-        setIsVoiceOpen(true);
-        setIsRecording(true);
-        isRecordingRef.current = true;
-        setVoiceDuration(0);
-        audioChunksRef.current = [];
-
-        // 1. Timer
-        if (timerRef.current) clearInterval(timerRef.current);
-        const startTime = Date.now();
-        timerRef.current = setInterval(() => {
-            setVoiceDuration(Math.floor((Date.now() - startTime) / 1000));
-        }, 1000);
-
-        // 2. HTML5 MediaRecorder
-        try {
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaStreamRef.current = stream;
-                const recorder = new MediaRecorder(stream);
-                mediaRecorderRef.current = recorder;
-
-                recorder.ondataavailable = (e) => {
-                    if (e.data.size > 0) {
-                        audioChunksRef.current.push(e.data);
-                    }
-                };
-
-                recorder.onstop = () => {
-                    if (audioChunksRef.current.length > 0) {
-                        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                            const base64 = reader.result as string;
-                            setVoiceNoteUrl(base64);
-                        };
-                        reader.readAsDataURL(blob);
-                    }
-                    if (mediaStreamRef.current) {
-                        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-                        mediaStreamRef.current = null;
-                    }
-                };
-
-                recorder.start(250);
-            }
-        } catch (mediaErr: unknown) {
-            const err = mediaErr as { name?: string };
-            console.warn("Microphone access error:", mediaErr);
-            if (err?.name === "NotAllowedError" || err?.name === "PermissionDeniedError") {
-                setMicError("Microphone access was blocked. Please enable microphone permissions in your browser address bar.");
-            } else {
-                setMicError("Unable to access microphone on this device.");
-            }
-        }
-
-        // 3. Web Speech API Recognition
-        try {
-            const SpeechRecognitionConstructor =
-                typeof window !== "undefined"
-                    ? ((window as unknown as { SpeechRecognition?: new () => ISpeechRecognition }).SpeechRecognition ||
-                       (window as unknown as { webkitSpeechRecognition?: new () => ISpeechRecognition }).webkitSpeechRecognition)
-                    : null;
-
-            if (SpeechRecognitionConstructor) {
-                const rec = new SpeechRecognitionConstructor();
-                recognitionRef.current = rec;
-                rec.continuous = true;
-                rec.interimResults = true;
-                rec.lang = lang;
-
-                rec.onresult = (event: ISpeechRecognitionEvent) => {
-                    let interim = "";
-                    let final = "";
-
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        const transcript = event.results[i][0].transcript;
-                        if (event.results[i].isFinal) {
-                            final += transcript + " ";
-                        } else {
-                            interim += transcript;
-                        }
-                    }
-
-                    if (final) {
-                        setSpeechTranscript((prev) => {
-                            const trimmed = final.trim();
-                            if (!prev) return trimmed;
-                            return `${prev} ${trimmed}`;
-                        });
-                    }
-                    setInterimTranscript(interim);
-                };
-
-                rec.onerror = (event: ISpeechRecognitionErrorEvent) => {
-                    if (event.error === "no-speech") return;
-                    if (event.error === "not-allowed") {
-                        setMicError("Microphone permission was denied. Please permit mic access in your browser.");
-                    }
-                };
-
-                rec.onend = () => {
-                    if (isRecordingRef.current && recognitionRef.current) {
-                        try {
-                            recognitionRef.current.start();
-                        } catch {}
-                    }
-                };
-
-                rec.start();
-            } else {
-                setMicError("Live dictation is optimized for Chrome, Edge, and Safari. Your audio will still be recorded!");
-            }
-        } catch (speechErr) {
-            console.warn("Speech recognition initialization error:", speechErr);
-        }
-    };
-
-    // Stop Voice Input
-    const closeVoiceModal = (commitText: boolean = true) => {
-        setIsRecording(false);
+    // Stop Voice Input & Close Modal
+    const closeVoiceModal = useCallback((commitText: boolean = true) => {
         isRecordingRef.current = false;
+
         if (timerRef.current) {
             clearInterval(timerRef.current);
             timerRef.current = null;
         }
-
+        if (restartTimerRef.current) {
+            clearTimeout(restartTimerRef.current);
+            restartTimerRef.current = null;
+        }
+        if (animFrameRef.current) {
+            cancelAnimationFrame(animFrameRef.current);
+            animFrameRef.current = null;
+        }
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+            try {
+                mediaRecorderRef.current.stop();
+            } catch {}
+        }
+        if (audioContextRef.current) {
+            try {
+                audioContextRef.current.close();
+            } catch {}
+            audioContextRef.current = null;
+        }
+        if (mediaStreamRef.current) {
+            try {
+                mediaStreamRef.current.getTracks().forEach((t) => t.stop());
+            } catch {}
+            mediaStreamRef.current = null;
+        }
         if (recognitionRef.current) {
             try {
                 recognitionRef.current.stop();
@@ -342,77 +256,285 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
             recognitionRef.current = null;
         }
 
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-            try {
-                mediaRecorderRef.current.stop();
-            } catch {}
-        }
+        setAudioLevel(1.0);
 
-        if (commitText) {
-            const fullSpoken = `${speechTranscript} ${interimTranscript}`.trim();
+        if (!commitText) {
+            // User clicked Cross (✕) - decline and restore initial textarea value
+            setValue(initialValueBeforeVoiceRef.current);
+            setTimeout(() => adjustHeight(), 50);
+        } else {
+            // User clicked Tick (✓) - ensure full accumulated transcript is committed into AI chat
+            const fullSpoken = [
+                accumulatedFinalRef.current,
+                currentCycleFinalRef.current,
+                interimTranscriptRef.current,
+            ].filter(Boolean).join(" ").trim();
+
             if (fullSpoken) {
-                setValue((prev) => {
-                    const existing = prev.trim();
-                    if (!existing) return fullSpoken;
-                    return `${existing}\n${fullSpoken}`;
-                });
-                setTimeout(() => adjustHeight(), 50);
+                const base = initialValueBeforeVoiceRef.current.trim();
+                const merged = base ? `${base}\n${fullSpoken}` : fullSpoken;
+                setValue(merged);
             }
+            setTimeout(() => {
+                adjustHeight();
+                textareaRef.current?.focus();
+            }, 50);
         }
 
         setIsVoiceOpen(false);
-    };
+    }, [adjustHeight, textareaRef]);
 
-    // Directly Submit Concern from Voice Modal
-    const submitDirectlyFromVoice = () => {
-        const fullSpoken = `${speechTranscript} ${interimTranscript}`.trim();
-        const finalQuery = (fullSpoken || value).trim();
-        closeVoiceModal(true);
-        if (finalQuery) {
-            handleAnalyze(finalQuery);
+    // Keyboard shortcuts for Siri voice overlay (Esc = cancel, Enter = done)
+    useEffect(() => {
+        if (!isVoiceOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                closeVoiceModal(false);
+            } else if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                closeVoiceModal(true);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isVoiceOpen, closeVoiceModal]);
+
+    // Live sync transcript into textarea value as words are spoken
+    const syncTextareaLive = useCallback((spokenText: string) => {
+        const base = initialValueBeforeVoiceRef.current.trim();
+        const merged = base ? (spokenText ? `${base}\n${spokenText}` : base) : spokenText;
+        setValue(merged);
+        adjustHeight();
+    }, [adjustHeight]);
+
+    // Initialize or restart SpeechRecognition instance
+    const initRecognition = (targetLang?: string) => {
+        if (!isRecordingRef.current) return;
+        try {
+            if (recognitionRef.current) {
+                try {
+                    recognitionRef.current.abort();
+                } catch {}
+                recognitionRef.current = null;
+            }
+
+            const SpeechRecognitionConstructor =
+                typeof window !== "undefined"
+                    ? ((window as unknown as { SpeechRecognition?: new () => ISpeechRecognition }).SpeechRecognition ||
+                       (window as unknown as { webkitSpeechRecognition?: new () => ISpeechRecognition }).webkitSpeechRecognition)
+                    : null;
+
+            if (!SpeechRecognitionConstructor) {
+                setMicError("Live dictation is optimized for Chrome, Edge, and Safari.");
+                return;
+            }
+
+            const rec = new SpeechRecognitionConstructor();
+            recognitionRef.current = rec;
+            rec.continuous = true;
+            rec.interimResults = true;
+            rec.lang = targetLang || selectedLanguage || (typeof navigator !== "undefined" && navigator.language) || "en-IN";
+
+            rec.onstart = () => {
+                setMicError(null);
+                setAudioLevel(1.2);
+            };
+
+            rec.onresult = (event: ISpeechRecognitionEvent) => {
+                let cycleFinal = "";
+                let cycleInterim = "";
+
+                // Iterate through results of current recognition session
+                for (let i = 0; i < event.results.length; i++) {
+                    const item = event.results[i];
+                    if (item.isFinal) {
+                        cycleFinal += item[0].transcript + " ";
+                    } else {
+                        cycleInterim += item[0].transcript;
+                    }
+                }
+
+                currentCycleFinalRef.current = cycleFinal.trim();
+                interimTranscriptRef.current = cycleInterim.trim();
+
+                // Combine past accumulated text with current cycle final text
+                const combinedFinal = [accumulatedFinalRef.current, currentCycleFinalRef.current]
+                    .filter(Boolean)
+                    .join(" ")
+                    .trim();
+
+                const fullSpoken = [combinedFinal, interimTranscriptRef.current]
+                    .filter(Boolean)
+                    .join(" ")
+                    .trim();
+
+                setSpeechTranscript(combinedFinal);
+                setInterimTranscript(interimTranscriptRef.current);
+
+                // Stream directly into the AI chat textarea in real time!
+                if (fullSpoken) {
+                    syncTextareaLive(fullSpoken);
+                }
+
+                // Bump wave animation on speech activity
+                setAudioLevel((prev) => Math.max(prev, 1.8));
+                setTimeout(() => {
+                    if (isRecordingRef.current) setAudioLevel(1.1);
+                }, 350);
+            };
+
+            rec.onerror = (event: ISpeechRecognitionErrorEvent) => {
+                console.warn("Speech recognition error:", event.error);
+                if (event.error === "no-speech" || event.error === "aborted") return;
+                if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+                    setMicError("Microphone permission was denied. Please permit mic access in your browser address bar.");
+                    return;
+                }
+                if (event.error === "network") {
+                    console.warn("Retrying speech recognition connection with en-US fallback...");
+                    if (isRecordingRef.current) {
+                        if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
+                        restartTimerRef.current = setTimeout(() => {
+                            if (isRecordingRef.current) initRecognition("en-US");
+                        }, 500);
+                    }
+                    return;
+                }
+                if (event.error === "language-not-supported") {
+                    if (rec.lang !== "en-US") {
+                        rec.lang = "en-US";
+                        try {
+                            rec.start();
+                        } catch {}
+                    }
+                    return;
+                }
+            };
+
+            rec.onend = () => {
+                // Safely commit this cycle's final text into accumulated memory so it's NEVER lost
+                if (currentCycleFinalRef.current) {
+                    accumulatedFinalRef.current = [accumulatedFinalRef.current, currentCycleFinalRef.current]
+                        .filter(Boolean)
+                        .join(" ")
+                        .trim();
+                    currentCycleFinalRef.current = "";
+                }
+
+                // Seamless restart on pause/silence so the user can continue speaking naturally
+                if (isRecordingRef.current) {
+                    if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
+                    restartTimerRef.current = setTimeout(() => {
+                        if (isRecordingRef.current) initRecognition(targetLang);
+                    }, 80);
+                }
+            };
+
+            rec.start();
+        } catch (speechErr) {
+            console.warn("Speech recognition initialization error:", speechErr);
         }
     };
+
+    // Start Voice Input & SiriWave
+    const startVoiceInput = async (lang = selectedLanguage) => {
+        setMicError(null);
+        setSpeechTranscript("");
+        setInterimTranscript("");
+        accumulatedFinalRef.current = "";
+        currentCycleFinalRef.current = "";
+        interimTranscriptRef.current = "";
+        initialValueBeforeVoiceRef.current = value;
+        setIsVoiceOpen(true);
+        isRecordingRef.current = true;
+        setVoiceDuration(0);
+        setAudioLevel(1.1);
+
+        // Timer
+        if (timerRef.current) clearInterval(timerRef.current);
+        timerRef.current = setInterval(() => {
+            setVoiceDuration((prev) => prev + 1);
+        }, 1000);
+
+        // Hardware Microphone connection for dynamic SiriWave pulsing & mic permission prompt
+        try {
+            if (typeof navigator !== "undefined" && navigator.mediaDevices?.getUserMedia) {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaStreamRef.current = stream;
+
+                // Also initialize MediaRecorder to save audio note
+                try {
+                    audioChunksRef.current = [];
+                    const recorder = new MediaRecorder(stream);
+                    mediaRecorderRef.current = recorder;
+                    recorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+                    };
+                    recorder.onstop = () => {
+                        if (audioChunksRef.current.length > 0) {
+                            const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                                setVoiceNoteUrl(reader.result as string);
+                            };
+                            reader.readAsDataURL(blob);
+                        }
+                    };
+                    recorder.start(250);
+                } catch {}
+
+                const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+                if (AudioCtx) {
+                    const ctx = new AudioCtx();
+                    audioContextRef.current = ctx;
+                    const source = ctx.createMediaStreamSource(stream);
+                    const analyser = ctx.createAnalyser();
+                    analyser.fftSize = 256;
+                    analyser.smoothingTimeConstant = 0.5;
+                    source.connect(analyser);
+                    analyserRef.current = analyser;
+
+                    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                    const checkAudio = () => {
+                        if (!isRecordingRef.current) return;
+                        analyser.getByteFrequencyData(dataArray);
+                        let sum = 0;
+                        for (let i = 0; i < dataArray.length; i++) {
+                            sum += dataArray[i];
+                        }
+                        const avg = sum / dataArray.length;
+                        const level = Math.min(3.2, Math.max(1.0, 1.0 + (avg / 28)));
+                        setAudioLevel(level);
+                        animFrameRef.current = requestAnimationFrame(checkAudio);
+                    };
+                    animFrameRef.current = requestAnimationFrame(checkAudio);
+                }
+            }
+        } catch (micErr) {
+            console.warn("Microphone hardware stream not available, continuing with Web Speech:", micErr);
+        }
+
+        // Start speech recognition directly
+        initRecognition(lang);
+    };
+
+
 
     // Change language while voice modal is open
     const changeLanguage = (newLang: "en-IN" | "hi-IN" | "en-US") => {
         setSelectedLanguage(newLang);
-        if (isRecording) {
+        if (isRecordingRef.current) {
             if (recognitionRef.current) {
                 try {
                     recognitionRef.current.stop();
                 } catch {}
+                recognitionRef.current = null;
             }
-            startVoiceInput(newLang);
+            if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
+            restartTimerRef.current = setTimeout(() => {
+                if (isRecordingRef.current) initRecognition(newLang);
+            }, 80);
         }
-    };
-
-    // Toggle Preview of Voice Note in Main Input Box
-    const togglePlayPreview = () => {
-        if (!audioPreviewRef.current && voiceNoteUrl) {
-            const audio = new Audio(voiceNoteUrl);
-            audioPreviewRef.current = audio;
-            audio.onended = () => setIsPlayingPreview(false);
-            audio.play();
-            setIsPlayingPreview(true);
-        } else if (audioPreviewRef.current) {
-            if (isPlayingPreview) {
-                audioPreviewRef.current.pause();
-                setIsPlayingPreview(false);
-            } else {
-                audioPreviewRef.current.play();
-                setIsPlayingPreview(true);
-            }
-        }
-    };
-
-    const clearVoiceNote = () => {
-        if (audioPreviewRef.current) {
-            audioPreviewRef.current.pause();
-            audioPreviewRef.current = null;
-        }
-        setVoiceNoteUrl(null);
-        setVoiceDuration(0);
-        setIsPlayingPreview(false);
     };
 
     const handleAnalyze = async (textToAnalyze?: string) => {
@@ -478,6 +600,8 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
 
             setIsSubmitted(true);
             setValue("");
+            setVoiceNoteUrl(null);
+            setVoiceDuration(0);
             adjustHeight(true);
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
@@ -530,7 +654,8 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
                             setIsSubmitted(false);
                             setValue("");
                             setSubmittedInfo(null);
-                            clearVoiceNote();
+                            setVoiceNoteUrl(null);
+                            setVoiceDuration(0);
                             adjustHeight(true);
                         }}
                         onViewHistory={onViewHistory}
@@ -541,10 +666,6 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
                 <div className="w-full max-w-4xl mx-auto space-y-6 my-auto">
                     {/* Header */}
                     <div className="flex flex-col items-center text-center space-y-2">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-semibold mb-1">
-                            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                            <span>OIL AI Safety Intelligence • Derrick Floor Intake</span>
-                        </div>
                         <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 tracking-tight">
                             Report Field Safety Concern
                         </h1>
@@ -581,40 +702,6 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
                                     disabled={isLoading}
                                 />
                             </div>
-
-                            {/* Voice Note Preview Chip if Recorded */}
-                            {voiceNoteUrl && (
-                                <div className="px-4 pb-2 pt-1 flex items-center gap-2 animate-in fade-in duration-200">
-                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium shadow-2xs">
-                                        <button
-                                            type="button"
-                                            onClick={togglePlayPreview}
-                                            className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 cursor-pointer shrink-0 transition-colors"
-                                            title={isPlayingPreview ? "Pause voice note" : "Play voice note preview"}
-                                        >
-                                            {isPlayingPreview ? (
-                                                <Pause className="w-3 h-3" />
-                                            ) : (
-                                                <Play className="w-3 h-3 ml-0.5" />
-                                            )}
-                                        </button>
-                                        <span className="font-mono font-semibold">
-                                            🎙️ Voice Dispatch Note ({formatDuration(voiceDuration)})
-                                        </span>
-                                        <button
-                                            type="button"
-                                            onClick={clearVoiceNote}
-                                            className="text-neutral-400 hover:text-red-600 ml-1.5 cursor-pointer p-0.5 transition-colors"
-                                            title="Discard audio recording"
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
-                                    </div>
-                                    <span className="text-[11px] text-neutral-400">
-                                        Attached to concern payload for Manager
-                                    </span>
-                                </div>
-                            )}
 
                             {/* Action Bar */}
                             <div className="flex items-center justify-between p-3 border-t border-neutral-100">
@@ -667,6 +754,21 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
                                     </button>
                                 </div>
                             </div>
+
+                            {/* AI Processing Latency Overlay with LumaSpin */}
+                            {isLoading && (
+                                <div className="absolute inset-0 bg-white/95 backdrop-blur-xs rounded-xl flex flex-col items-center justify-center z-20 space-y-3 p-6 animate-in fade-in duration-200">
+                                    <LumaSpin size={46} />
+                                    <div className="text-center space-y-1">
+                                        <p className="text-xs font-semibold text-neutral-800 tracking-wide">
+                                            OIL AI Safety Engine Analyzing Observation...
+                                        </p>
+                                        <p className="text-[11px] text-neutral-500 max-w-sm">
+                                            Evaluating SIF precursor probability, Life-Saving Rules compliance, and priority level.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -691,154 +793,132 @@ export function VercelV0Chat({ user, onViewHistory }: VercelV0ChatProps = {}) {
                 </div>
             )}
 
-            {/* SiriWave Ambient Voice Modal */}
+            {/* Siri Voice Intelligence Minimalist Centered Overlay */}
             {isVoiceOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-xl animate-in fade-in duration-300">
-                    <div className="relative w-full max-w-xl bg-gradient-to-b from-neutral-900 via-[#0c0c0e] to-black border border-neutral-800 rounded-3xl p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.9)] flex flex-col items-center text-center space-y-5 overflow-hidden">
-                        {/* Ambient glow behind SiriWave */}
-                        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-
-                        {/* Top Header */}
-                        <div className="w-full flex items-center justify-between border-b border-neutral-800/80 pb-4 z-10">
-                            <div className="flex items-center gap-2.5">
-                                <span className="relative flex h-2.5 w-2.5">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-                                </span>
-                                <span className="text-[11px] font-bold tracking-wider uppercase text-neutral-300">
-                                    OIL Voice AI Dictation
-                                </span>
-                            </div>
-
-                            {/* Timer & Close */}
-                            <div className="flex items-center gap-3">
-                                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-neutral-800 text-neutral-300 border border-neutral-700">
-                                    {formatDuration(voiceDuration)}
-                                </span>
-                                <button
-                                    type="button"
-                                    onClick={() => closeVoiceModal(false)}
-                                    className="w-7 h-7 rounded-full bg-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-700 flex items-center justify-center transition-colors cursor-pointer"
-                                    aria-label="Close voice modal"
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* SiriWave Visualizer */}
-                        <div className="relative z-10 flex flex-col items-center">
-                            <SiriWave
-                                variant={waveVariant}
-                                size={260}
-                                renderScale={1}
-                                className="shadow-[0_0_50px_rgba(59,130,246,0.3)] rounded-2xl mx-auto border border-neutral-800/80"
-                            />
-
-                            {/* Visualizer Style Switcher */}
-                            <div className="flex items-center gap-1 mt-3 p-1 bg-neutral-900/90 rounded-full border border-neutral-800 text-[11px]">
-                                <button
-                                    type="button"
-                                    onClick={() => setWaveVariant("wave")}
-                                    className={cn(
-                                        "px-3 py-1 rounded-full font-medium transition-all cursor-pointer",
-                                        waveVariant === "wave"
-                                            ? "bg-neutral-700 text-white shadow-xs"
-                                            : "text-neutral-400 hover:text-neutral-200"
-                                    )}
-                                >
-                                    iOS Waveform
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setWaveVariant("fluid-dots")}
-                                    className={cn(
-                                        "px-3 py-1 rounded-full font-medium transition-all cursor-pointer",
-                                        waveVariant === "fluid-dots"
-                                            ? "bg-neutral-700 text-white shadow-xs"
-                                            : "text-neutral-400 hover:text-neutral-200"
-                                    )}
-                                >
-                                    Fluid Energy
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Live Transcription Readout Panel */}
-                        <div className="w-full z-10 bg-neutral-900/70 border border-neutral-800/90 rounded-2xl p-4 text-left min-h-[95px] flex flex-col justify-between">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5">
-                                    <AudioWaveform className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
-                                    Live Voice Transcription
-                                </span>
-
-                                {/* Language Selector */}
-                                <div className="flex items-center gap-1">
-                                    <Globe className="w-3 h-3 text-neutral-400" />
-                                    <select
-                                        value={selectedLanguage}
-                                        onChange={(e) => changeLanguage(e.target.value as "en-IN" | "hi-IN" | "en-US")}
-                                        className="bg-transparent text-neutral-300 text-[11px] font-medium border-none focus:outline-none cursor-pointer"
-                                    >
-                                        <option value="en-IN" className="bg-neutral-900 text-white">English (India) 🇮🇳</option>
-                                        <option value="hi-IN" className="bg-neutral-900 text-white">हिन्दी (Hindi) 🇮🇳</option>
-                                        <option value="en-US" className="bg-neutral-900 text-white">English (US) 🌐</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="flex-1 flex items-center">
-                                {speechTranscript || interimTranscript ? (
-                                    <p className="text-sm font-medium text-neutral-100 leading-relaxed">
-                                        {speechTranscript} <span className="text-blue-400 italic">{interimTranscript}</span>
-                                    </p>
-                                ) : (
-                                    <p className="text-xs text-neutral-500 italic">
-                                        Listening... Speak your observation clearly (e.g. &ldquo;Bypassed gas alarm detected at Moran Rig #04 Derrick floor&rdquo;).
-                                    </p>
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Voice Concern Assistant"
+                    onClick={(e) => {
+                        // Clicking backdrop commits spoken text safely
+                        if (e.target === e.currentTarget) {
+                            closeVoiceModal(true);
+                        }
+                    }}
+                    className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-md animate-in fade-in duration-300 select-none overflow-hidden"
+                >
+                    {/* Top Language Switcher Bar */}
+                    <div className="absolute top-6 z-10 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-xl shadow-lg">
+                        <Globe className="w-3.5 h-3.5 text-neutral-300" />
+                        <span className="text-[11px] font-medium text-neutral-300 mr-0.5">Language:</span>
+                        {(["en-IN", "en-US", "hi-IN"] as const).map((lang) => (
+                            <button
+                                key={lang}
+                                type="button"
+                                onClick={() => changeLanguage(lang)}
+                                className={cn(
+                                    "px-2.5 py-0.5 rounded-full text-[11px] font-semibold transition-all cursor-pointer",
+                                    selectedLanguage === lang
+                                        ? "bg-white/25 text-white shadow-xs border border-white/30"
+                                        : "text-neutral-400 hover:text-white hover:bg-white/10"
                                 )}
-                            </div>
+                            >
+                                {lang === "en-IN" ? "English (India) 🇮🇳" : lang === "en-US" ? "English (US) 🌐" : "हिंदी (Hindi) 🇮🇳"}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Centered Siri Effect & Controls (No bulky boxes, pure organic glowing interface) */}
+                    <div className="relative flex flex-col items-center justify-center w-full max-w-2xl px-6">
+                        
+                        {/* Radiant Ambient Aura Glow behind the wave */}
+                        <div
+                            className="absolute -top-4 w-[420px] sm:w-[520px] h-[220px] rounded-full blur-[85px] opacity-75 pointer-events-none transition-transform duration-200"
+                            style={{
+                                background: "radial-gradient(ellipse at center, rgba(59,130,246,0.45) 0%, rgba(168,85,247,0.4) 40%, rgba(245,158,11,0.25) 75%, transparent 100%)",
+                                transform: `scale(${0.9 + (audioLevel - 0.85) * 0.4})`
+                            }}
+                        />
+
+                        {/* SiriWave Visualizer (Rendered completely transparent in center) */}
+                        <div className="relative flex items-center justify-center">
+                            <SiriWave
+                                variant="wave"
+                                width={540}
+                                height={240}
+                                amplitude={audioLevel}
+                                renderScale={1.2}
+                                className="filter drop-shadow-[0_0_35px_rgba(59,130,246,0.5)]"
+                            />
                         </div>
 
-                        {/* Error notice if microphone is blocked */}
-                        {micError && (
-                            <div className="w-full text-xs text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-xl p-2.5 text-left z-10">
-                                {micError}
-                            </div>
-                        )}
+                        {/* Subtle Floating Real-Time Subtitle */}
+                        <div className="min-h-[56px] flex flex-col items-center justify-center text-center px-4 mt-2 max-w-lg">
+                            {micError ? (
+                                <p className="text-xs sm:text-sm text-amber-300 font-medium bg-amber-950/70 border border-amber-800/80 px-4 py-1.5 rounded-full backdrop-blur-md shadow-lg">
+                                    {micError}
+                                </p>
+                            ) : speechTranscript || interimTranscript ? (
+                                <div className="space-y-1">
+                                    <p className="text-base sm:text-lg font-medium text-white/95 leading-relaxed tracking-wide drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] line-clamp-2">
+                                        &ldquo;{speechTranscript} <span className="text-blue-300/90 italic">{interimTranscript}</span>&rdquo;
+                                    </p>
+                                    <p className="text-[11px] text-emerald-400 font-medium flex items-center justify-center gap-1.5">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                        Writing live to AI chat • Click Done (✓) or press Enter to finish
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2 text-sm text-neutral-300/80 font-medium tracking-wide">
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                    </span>
+                                    <span>Listening to your concern... Speak clearly into your microphone</span>
+                                    {voiceDuration > 0 && (
+                                        <span className="ml-1 text-xs font-mono text-neutral-400">
+                                            ({formatDuration(voiceDuration)})
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
 
-                        {/* Bottom Modal Actions */}
-                        <div className="w-full flex items-center justify-between gap-3 pt-2 z-10">
+                        {/* Two Tactile Controls: Cancel (✕) and Tick (✓) */}
+                        <div className="flex items-center justify-center gap-8 sm:gap-10 mt-6">
+                            {/* Cancel Button */}
                             <button
                                 type="button"
                                 onClick={() => closeVoiceModal(false)}
-                                className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 transition-colors cursor-pointer"
+                                className="group relative flex flex-col items-center gap-2 cursor-pointer transition-transform active:scale-90"
+                                title="Cancel and discard voice recording (Esc)"
+                                aria-label="Cancel recording"
                             >
-                                Cancel
+                                <div className="w-14 h-14 rounded-full flex items-center justify-center bg-white/10 hover:bg-red-500/20 border border-white/20 hover:border-red-400/50 backdrop-blur-xl text-white shadow-[0_8px_20px_rgba(0,0,0,0.4)] hover:shadow-[0_0_25px_rgba(239,68,68,0.4)] transition-all duration-200">
+                                    <X className="w-6 h-6 text-neutral-300 group-hover:text-red-400 transition-colors" />
+                                </div>
+                                <span className="text-[11px] font-semibold text-neutral-400 group-hover:text-red-400 tracking-wider uppercase transition-colors">
+                                    Cancel (Esc)
+                                </span>
                             </button>
 
-                            <div className="flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => closeVoiceModal(true)}
-                                    disabled={!speechTranscript.trim() && !interimTranscript.trim() && voiceDuration === 0}
-                                    className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/30 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <Check className="w-4 h-4" />
-                                    <span>Done Speaking</span>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={submitDirectlyFromVoice}
-                                    disabled={!speechTranscript.trim() && !interimTranscript.trim()}
-                                    className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/30 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <Sparkles className="w-4 h-4" />
-                                    <span>Analyze Now</span>
-                                </button>
-                            </div>
+                            {/* Tick Button */}
+                            <button
+                                type="button"
+                                onClick={() => closeVoiceModal(true)}
+                                className="group relative flex flex-col items-center gap-2 cursor-pointer transition-transform active:scale-90"
+                                title="Confirm and save voice concern (Enter)"
+                                aria-label="Confirm recording"
+                            >
+                                <div className="w-14 h-14 rounded-full flex items-center justify-center bg-emerald-500/80 hover:bg-emerald-500 border border-emerald-400/60 backdrop-blur-xl text-white shadow-[0_8px_25px_rgba(16,185,129,0.35)] hover:shadow-[0_0_35px_rgba(16,185,129,0.7)] transition-all duration-200">
+                                    <Check className="w-6 h-6 text-white stroke-[2.5] group-hover:scale-110 transition-transform" />
+                                </div>
+                                <span className="text-[11px] font-semibold text-emerald-400 group-hover:text-emerald-300 tracking-wider uppercase transition-colors">
+                                    Done (Enter)
+                                </span>
+                            </button>
                         </div>
+
                     </div>
                 </div>
             )}

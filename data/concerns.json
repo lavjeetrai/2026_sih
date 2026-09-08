@@ -4,6 +4,65 @@
     "title": "To Do",
     "cards": [
       {
+        "id": "worker-concern-1788854302877",
+        "title": "Minor tripping hazard on walkway — Walkway grating slightly uneven near muster point",
+        "description": "Observation: Walkway grating slightly uneven near muster point",
+        "tags": [
+          {
+            "label": "Minor tripping hazard on walkway",
+            "dotColor": "bg-blue-500"
+          },
+          {
+            "label": "SIF 45",
+            "dotColor": "bg-amber-500"
+          }
+        ],
+        "priority": "Medium",
+        "date": "Sep 8",
+        "comments": 0,
+        "attachments": 0,
+        "voiceNoteUrl": null,
+        "hasVoiceRecording": false,
+        "avatars": [
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Walkway grating slightly uneven near muster point",
+        "hazard": "Minor tripping hazard on walkway",
+        "failed_barrier": null,
+        "evidence_quote": null,
+        "sif_score": 45,
+        "sif_potential": null,
+        "iogp_rule": "Line of Fire",
+        "critical_barrier_failure": null,
+        "inference_engine": null,
+        "reportedAt": "Sep 8, 2026 • 01:28 PM IST",
+        "site_location": "Moran Rig #04",
+        "ptw_id": null,
+        "ptw_status": "ACTIVE",
+        "triage_status": "Normal Triage",
+        "interlock_data": null,
+        "reporter": {
+          "name": "Lav Kumar",
+          "role": "HSE Field Safety Officer (Derrick Operations)",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+          "email": "lav.kumar@oilindia.in",
+          "station": "Moran Rig #04 • Wellhead Section",
+          "radioChannel": "UHF CH-04",
+          "badgeId": "OIL-FLD-5542",
+          "phone": "+91 94350 44521"
+        },
+        "reviewer": null,
+        "llmSuggestions": [
+          "Issue immediate Stop Work Authority to halt unsafe operational conditions and clear personnel from line of fire.",
+          "Perform physical barrier audit to re-establish primary and secondary defense layers according to IOGP safety protocols.",
+          "Log safety intervention in OIL India HSE registry and conduct pre-job safety debrief before clearing work permit."
+        ],
+        "status": "To Do",
+        "columnId": "col-1",
+        "createdAt": "2026-09-08T07:58:22.925Z",
+        "_id": "6a9fc01e820e354de03653b3"
+      },
+      {
         "id": "worker-concern-1788848273321",
         "title": "Working at Heights — एक आदमी दो सेंटीमीटर से गिर गया।",
         "description": "Quote: \"एक आदमी दो सेंटीमीटर से गिर गया।\" | Failed Barrier: No Failure",
@@ -18881,6 +18940,103 @@
     "id": "col-2",
     "title": "In Progress",
     "cards": [
+      {
+        "id": "worker-concern-1788854326484",
+        "title": "Monkey Board Fall Arrest Cable Severed — Derrick monkey board secondary safety harness severed during high-winds casing run. Extreme fall hazard.",
+        "description": "Observation: Derrick monkey board secondary safety harness severed during high-winds casing run. Extreme fall hazard.",
+        "tags": [
+          {
+            "label": "🛑 SWA Revocation (PTW-OIL-2026-8841)",
+            "dotColor": "bg-red-600"
+          },
+          {
+            "label": "Monkey Board Fall Arrest Cable Severed",
+            "dotColor": "bg-red-500"
+          },
+          {
+            "label": "SIF 92",
+            "dotColor": "bg-red-500"
+          }
+        ],
+        "priority": "High",
+        "date": "Sep 8",
+        "comments": 0,
+        "attachments": 0,
+        "voiceNoteUrl": null,
+        "hasVoiceRecording": false,
+        "avatars": [
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Derrick monkey board secondary safety harness severed during high-winds casing run. Extreme fall hazard.",
+        "hazard": "Monkey Board Fall Arrest Cable Severed",
+        "failed_barrier": null,
+        "evidence_quote": null,
+        "sif_score": 92,
+        "sif_potential": true,
+        "iogp_rule": "Working at Height",
+        "critical_barrier_failure": true,
+        "inference_engine": null,
+        "reportedAt": "Sep 8, 2026 • 01:28 PM IST",
+        "site_location": "Jorhat Drilling Rig 4",
+        "ptw_id": "PTW-OIL-2026-8841",
+        "ptw_status": "ACTIVE",
+        "triage_status": "Permit Reinstated / Normal Ops",
+        "interlock_data": {
+          "is_interlocked": false,
+          "triggered_at": "2026-09-08T07:58:46.519Z",
+          "triggered_by_report_id": "worker-concern-1788854326484",
+          "trigger_reason": "Autonomous Stop-Work Authority (SWA) Triggered: SIF Score 92/100 detected in active work zone. Breach: Working at Height.",
+          "sap_ehs_reference": "SAP-WCM-NOTIF-0098841",
+          "resolved_at": "2026-09-08T07:59:09.515Z",
+          "resolved_by_officer": "OIL-HSE-9021",
+          "resolution_notes": "Physical On-Site Verification Completed: On-site physical stand-down completed. Replaced severed monkey board cable with certified 16mm wire rope and dual inertia reel. Anchor load-tested to 22.2 kN. Reinstatement authorized. [Checklist: 4 items verified]",
+          "sap_wcm_payload": {
+            "event": "SAP_WCM_PERMIT_REINSTATEMENT",
+            "ptw_id": "PTW-OIL-2026-8841",
+            "site_location": "Jorhat Drilling Rig 4",
+            "status": "REINSTATED_FIELD_VERIFIED",
+            "sap_notification_id": "SAP-WCM-NOTIF-0098841",
+            "reinstated_by_badge": "OIL-HSE-9021",
+            "checklist_verified": [
+              "Physical on-site perimeter secured and non-essential crew evacuated",
+              "Energy Isolation / LOTO positive isolation verified",
+              "Toolbox talk conducted with drilling crew",
+              "Direct field inspection completed verifying zero residual hazards"
+            ],
+            "notes": "On-site physical stand-down completed. Replaced severed monkey board cable with certified 16mm wire rope and dual inertia reel. Anchor load-tested to 22.2 kN. Reinstatement authorized.",
+            "timestamp": "2026-09-08T07:59:09.515Z"
+          },
+          "emergency_dispatch": {
+            "channel": "SMS/PAGER_GATEWAY",
+            "gateway_id": "OIL-HSE-GW-09",
+            "recipient": "Rig Superintendent, Installation Manager & Area Safety Lead",
+            "recipient_mobile_cluster": "+91 94350 44521, +91 374 280 4501",
+            "message": "CRITICAL SIF DETECTED (92/100): WORK PERMIT PTW-OIL-2026-8841 AT JORHAT DRILLING RIG 4 SUSPENDED IMMEDIATELY. STOP-WORK AUTHORITY (SWA) IN FORCE. PHYSICAL ON-SITE INSPECTION REQUIRED.",
+            "sent_at": "2026-09-08T07:58:46.519Z",
+            "status": "DISPATCHED_ACKNOWLEDGED"
+          }
+        },
+        "reporter": {
+          "name": "Lav Kumar",
+          "role": "HSE Field Safety Officer (Derrick Operations)",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+          "email": "lav.kumar@oilindia.in",
+          "station": "Moran Rig #04 • Wellhead Section",
+          "radioChannel": "UHF CH-04",
+          "badgeId": "OIL-FLD-5542",
+          "phone": "+91 94350 44521"
+        },
+        "reviewer": null,
+        "llmSuggestions": [
+          "Issue immediate Stop Work Order on elevated platform until 100% tie-off compliance and toe-board barrier integrity is re-certified.",
+          "Conduct immediate physical pull-test and harness web integrity audit for all personnel working above 1.8 meters.",
+          "Convene mandatory Stand-Down Tool Box Talk with crew on IOGP Life-Saving Rule #1 (Work at Height) before work resumption."
+        ],
+        "status": "In Progress",
+        "columnId": "col-2",
+        "createdAt": "2026-09-08T07:58:57.709Z",
+        "_id": "6a9fc041820e354de03653b4"
+      },
       {
         "id": "worker-concern-1788845869663",
         "title": "Fall from Height / Gravitational Energy — Ek worker 13 centimetre se niche gir Gaya.",

@@ -492,7 +492,7 @@ export async function lockAndSealFix(
           cardFound = true;
           return {
             ...card,
-            status: "Fix Deployed & Locked",
+            status: "Fix Deployed & Locked" as const,
             ledgerLock: {
               isLocked: true,
               blockIndex: newIndex,

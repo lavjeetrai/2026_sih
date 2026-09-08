@@ -154,5 +154,22 @@
       "assignedRole": "worker",
       "remarks": "Verified credentials and assigned station clearance at Moran Rig #04."
     }
+  },
+  {
+    "_id": "6a9fc0a22005a3e4af1ba123",
+    "name": "LAVJEET KUMAR RAI",
+    "email": "lavjeetkumarrai@gmail.com",
+    "password": "google_firebase_sso",
+    "role": "worker",
+    "requestedRole": "worker",
+    "badgeId": "OIL-FLD-5542",
+    "designation": "Field Safety Officer",
+    "station": "Moran Rig #04 • Wellhead Section",
+    "radioChannel": "UHF CH-04",
+    "phone": "+91 94350 44521",
+    "avatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocKFq1KHDrCRyowY64y2DyEzTTUitUHCe9NG3qI8nK5zbH_6Lcs=s96-c",
+    "status": "pending",
+    "createdAt": "2026-09-08T08:00:34.578Z",
+    "updatedAt": "2026-09-08T08:00:34.578Z"
   }
 ]

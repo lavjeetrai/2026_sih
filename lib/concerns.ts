@@ -33,8 +33,6 @@ export interface CardData {
   tasksTotal?: number;
   comments?: number;
   attachments?: number;
-  voiceNoteUrl?: string;
-  hasVoiceRecording?: boolean;
   coverImage?: string;
   // Structured safety fields
   observation?: string;
@@ -52,6 +50,8 @@ export interface CardData {
   llmSuggestions?: string[];
   status?: "To Do" | "In Progress" | "Done" | "Fix Deployed & Locked";
   columnId?: string;
+  voiceNoteUrl?: string | null;
+  hasVoiceRecording?: boolean;
   ledgerLock?: {
     isLocked: boolean;
     blockIndex: number;
@@ -90,8 +90,8 @@ export interface WorkerConcernPayload {
   iogp_rule?: string;
   critical_barrier_failure?: boolean;
   inference_engine?: "modal" | "ollama" | "fallback";
-  reporter?: string | Partial<ReporterInfo>;
   voiceNoteUrl?: string;
+  reporter?: string | Partial<ReporterInfo>;
 }
 
 // Clean production board schema for OIL India HSE Operations (no mock seed cards)
@@ -438,13 +438,6 @@ export async function addConcernFromWorker(payload: WorkerConcernPayload): Promi
     });
   }
 
-  if (payload.voiceNoteUrl) {
-    tags.push({
-      label: "🎙️ Spoken Note",
-      dotColor: "bg-emerald-500",
-    });
-  }
-
   const now = new Date();
   const formattedTime =
     now.toLocaleDateString("en-US", {
@@ -461,9 +454,7 @@ export async function addConcernFromWorker(payload: WorkerConcernPayload): Promi
     priority,
     date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     comments: 0,
-    attachments: payload.voiceNoteUrl ? 1 : 0,
-    voiceNoteUrl: payload.voiceNoteUrl,
-    hasVoiceRecording: Boolean(payload.voiceNoteUrl),
+    attachments: 0,
     avatars: [
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
     ],
@@ -476,6 +467,7 @@ export async function addConcernFromWorker(payload: WorkerConcernPayload): Promi
     iogp_rule: payload.iogp_rule,
     critical_barrier_failure: payload.critical_barrier_failure,
     inference_engine: payload.inference_engine,
+    voiceNoteUrl: payload.voiceNoteUrl,
     reportedAt: formattedTime,
     reporter:
       typeof payload.reporter === "object" && payload.reporter

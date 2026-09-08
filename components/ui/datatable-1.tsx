@@ -17,6 +17,7 @@ import {
 import { usersData, type UserData } from "@/components/ui/datatable-1-utils/datatable-1-data";
 import { Datatable1Pagination } from "@/components/ui/datatable-1-utils/datatable-1-pagination";
 import { Datatable1Toolbar } from "@/components/ui/datatable-1-utils/datatable-1-toolbar";
+import { LumaSpin } from "@/components/ui/luma-spin";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -47,7 +48,6 @@ export function Datatable1({
   description,
   onRefresh,
   isLoading,
-  onAction,
   className,
 }: Datatable1Props = {}) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -97,7 +97,16 @@ export function Datatable1({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {currentUsers.length === 0 ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-44 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-3">
+                      <LumaSpin size={44} />
+                      <span className="text-xs text-muted-foreground font-medium">Synchronizing personnel records...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : currentUsers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="h-32 text-center text-sm text-neutral-400 font-medium">
                     NOTHING TO SHOW HERE

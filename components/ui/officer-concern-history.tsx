@@ -12,6 +12,7 @@ import { type CardData, type ColumnData } from "@/lib/concerns";
 import { type UserSessionData } from "./auth-form-1";
 import { CardDetailModal } from "./card-detail-modal";
 import { GlassmorphismProfileCard } from "./profile-card-1";
+import { LumaSpin } from "@/components/ui/luma-spin";
 
 
 interface OfficerConcernHistoryProps {
@@ -27,33 +28,12 @@ export function OfficerConcernHistory({ user, onLogNewConcern }: OfficerConcernH
   const [expandedIds, setExpandedIds] = React.useState<Set<string>>(new Set());
   const [inspectCardInfo, setInspectCardInfo] = React.useState<{ card: CardData; columnTitle: string; columnId: string } | null>(null);
 
-  const toggleExpand = (cardId: string) => {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(cardId)) {
-        next.delete(cardId);
-      } else {
-        next.add(cardId);
-      }
-      return next;
-    });
-  };
-
-  const expandAll = () => {
-    setExpandedIds(new Set(allCards.map(({ card }) => card.id)));
-  };
-
-  const collapseAll = () => {
-    setExpandedIds(new Set());
-  };
-
   const fetchConcerns = React.useCallback(async () => {
     if (!user?.email && !user?.name) {
       setBoard([]);
       setIsLoading(false);
       return;
     }
-    setIsLoading(true);
     try {
       const params = new URLSearchParams();
       if (user.email) params.set("officerEmail", user.email);
@@ -74,7 +54,9 @@ export function OfficerConcernHistory({ user, onLogNewConcern }: OfficerConcernH
   React.useEffect(() => {
     fetchConcerns();
     const interval = setInterval(fetchConcerns, 5000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [fetchConcerns]);
 
   // Flatten all cards with their current column context
@@ -91,6 +73,26 @@ export function OfficerConcernHistory({ user, onLogNewConcern }: OfficerConcernH
     });
     return list;
   }, [board]);
+
+  const toggleExpand = (cardId: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(cardId)) {
+        next.delete(cardId);
+      } else {
+        next.add(cardId);
+      }
+      return next;
+    });
+  };
+
+  const expandAll = () => {
+    setExpandedIds(new Set(allCards.map(({ card }) => card.id)));
+  };
+
+  const collapseAll = () => {
+    setExpandedIds(new Set());
+  };
 
   // Filter cards matching this field officer ONLY - strictly private isolation
   const officerCards = React.useMemo(() => {
@@ -271,7 +273,14 @@ export function OfficerConcernHistory({ user, onLogNewConcern }: OfficerConcernH
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {filteredCards.length === 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-24 space-y-3">
+            <LumaSpin size={48} />
+            <p className="text-xs font-medium text-neutral-500 tracking-wide">
+              Loading recorded field concerns...
+            </p>
+          </div>
+        ) : filteredCards.length === 0 ? (
           <p className="text-sm text-neutral-400 text-center w-full py-16">
             {searchQuery || selectedStage !== "all" ? "No Match Found" : "No concerns submitted yet"}
           </p>
@@ -305,7 +314,7 @@ export function OfficerConcernHistory({ user, onLogNewConcern }: OfficerConcernH
               </div>
             </div>
 
-            {filteredCards.map(({ card, columnTitle, columnId }) => {
+            {filteredCards.map(({ card, columnTitle }) => {
               const stage = getStageBadge(columnTitle);
               const isExpanded = expandedIds.has(card.id);
 

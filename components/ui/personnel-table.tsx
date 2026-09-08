@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { ChevronDown, Search, RefreshCw, Users, ShieldCheck } from "lucide-react";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { type UserSessionData } from "./auth-form-1";
+import { LumaSpin } from "@/components/ui/luma-spin";
 
 interface PersonnelUser {
   name: string;
@@ -40,7 +41,7 @@ function formatDate(d: string | Date) {
 const HEAD = "px-4 py-3 text-left text-[11px] font-semibold text-neutral-500 uppercase tracking-wider whitespace-nowrap";
 const ITEMS_PER_PAGE = 8;
 
-export function PersonnelTable({ currentManager }: PersonnelTableProps) {
+export function PersonnelTable({}: PersonnelTableProps = {}) {
   const [activeTab, setActiveTab] = React.useState<"officers" | "managers">("officers");
   const [users, setUsers] = React.useState<PersonnelUser[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -58,7 +59,26 @@ export function PersonnelTable({ currentManager }: PersonnelTableProps) {
     } finally { setIsLoading(false); }
   }, []);
 
-  React.useEffect(() => { fetchUsers(); }, [fetchUsers]);
+  React.useEffect(() => {
+    let isMounted = true;
+    const load = async () => {
+      try {
+        const res = await fetch("/api/auth?type=all");
+        const json = await res.json();
+        if (isMounted && json.success && Array.isArray(json.users)) {
+          setUsers(json.users);
+        }
+      } catch (err) {
+        console.warn("[PersonnelTable] Failed to fetch:", err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+    load();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const officers = React.useMemo(() => users.filter((u) => u.role === "worker" && u.status === "approved"), [users]);
   const managers = React.useMemo(() => users.filter((u) => u.role === "manager" && u.status === "approved"), [users]);
@@ -76,10 +96,9 @@ export function PersonnelTable({ currentManager }: PersonnelTableProps) {
     );
   }, [source, searchQuery]);
 
-  React.useEffect(() => { setPage(1); }, [activeTab, searchQuery]);
-
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
-  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  const safePage = Math.min(page, totalPages);
+  const paginated = filtered.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
 
   return (
     <div className="flex-1 flex flex-col h-full bg-neutral-50/70 overflow-hidden font-sans">
@@ -93,12 +112,12 @@ export function PersonnelTable({ currentManager }: PersonnelTableProps) {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 mt-4 pt-3 border-t border-neutral-100">
           <div className="flex items-center gap-1.5">
-            <button type="button" onClick={() => setActiveTab("officers")} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border", activeTab === "officers" ? "bg-neutral-900 text-white border-neutral-900 shadow-xs" : "bg-neutral-100/80 text-neutral-600 border-neutral-200/70 hover:bg-neutral-200/70")}>
+            <button type="button" onClick={() => { setActiveTab("officers"); setPage(1); }} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border", activeTab === "officers" ? "bg-neutral-900 text-white border-neutral-900 shadow-xs" : "bg-neutral-100/80 text-neutral-600 border-neutral-200/70 hover:bg-neutral-200/70")}>
               <Users className="w-3.5 h-3.5" />
               <span>Field Officers</span>
               <span className={cn("px-1.5 rounded-full text-[10px] font-bold", activeTab === "officers" ? "bg-neutral-700 text-white" : "bg-neutral-200 text-neutral-700")}>{officers.length}</span>
             </button>
-            <button type="button" onClick={() => setActiveTab("managers")} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border", activeTab === "managers" ? "bg-neutral-900 text-white border-neutral-900 shadow-xs" : "bg-neutral-100/80 text-neutral-600 border-neutral-200/70 hover:bg-neutral-200/70")}>
+            <button type="button" onClick={() => { setActiveTab("managers"); setPage(1); }} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border", activeTab === "managers" ? "bg-neutral-900 text-white border-neutral-900 shadow-xs" : "bg-neutral-100/80 text-neutral-600 border-neutral-200/70 hover:bg-neutral-200/70")}>
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Managers</span>
               <span className={cn("px-1.5 rounded-full text-[10px] font-bold", activeTab === "managers" ? "bg-neutral-700 text-white" : "bg-neutral-200 text-neutral-700")}>{managers.length}</span>
@@ -106,7 +125,7 @@ export function PersonnelTable({ currentManager }: PersonnelTableProps) {
           </div>
           <div className="relative w-full sm:w-60">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-            <Input type="text" placeholder="Search name, badge, station..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-8 text-xs bg-white h-8 rounded-lg" />
+            <Input type="text" placeholder="Search name, badge, station..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }} className="pl-8 text-xs bg-white h-8 rounded-lg" />
           </div>
         </div>
       </div>
@@ -114,7 +133,10 @@ export function PersonnelTable({ currentManager }: PersonnelTableProps) {
       {/* Table */}
       <div className="flex-1 overflow-auto">
         {isLoading ? (
-          <div className="flex items-center justify-center h-40"><RefreshCw className="w-5 h-5 animate-spin text-neutral-400" /></div>
+          <div className="flex flex-col items-center justify-center h-48 space-y-3">
+            <LumaSpin size={44} />
+            <span className="text-xs text-neutral-400 font-medium">Loading personnel directory...</span>
+          </div>
         ) : filtered.length === 0 ? (
           <p className="text-sm text-neutral-400 text-center py-16">{searchQuery ? "No match found" : `No ${activeTab === "officers" ? "field officers" : "managers"} yet`}</p>
         ) : (

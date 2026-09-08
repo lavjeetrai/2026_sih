@@ -20,7 +20,7 @@ export type SiriWaveVariant = "wave" | "fluid-dots"
 const VERTEX_SHADER = `attribute vec2 aPos; void main(){ gl_Position=vec4(aPos,0.0,1.0); }`
 
 const WAVE_SHADER = `precision highp float;
-uniform vec2 iResolution; uniform float iTime;
+uniform vec2 iResolution; uniform float iTime; uniform float uAmplitude;
 const float PI = 3.14159265359;
 const float AMPLITUDE   = 0.32;
 const float FREQ        = 1.1;
@@ -47,9 +47,13 @@ const float HIGH_ABAMP  = 0.06;
 const float RESOLVED    = 1.0;
 const float UNRES_SCALE = 0.14;
 
+// Apple Intelligence / Siri chromatic palette matching reference image:
+// Bottom is golden amber/yellow, middle transitions through magenta/violet, top is electric cyan/blue, center is pure white.
 vec3 spectral4(int s){
-    float x = float(s);
-    return clamp(vec3(abs(x-3.0)-1.0, 2.0-abs(x-2.0), 2.0-abs(x-4.0)), 0.0, 1.0);
+    if (s == 0) return vec3(1.0, 0.72, 0.16); // Golden Amber / Warm Sunlight (bottom)
+    if (s == 1) return vec3(0.96, 0.32, 0.62); // Radiant Rose / Magenta
+    if (s == 2) return vec3(0.48, 0.30, 0.98); // Deep Violet / Indigo
+    return vec3(0.15, 0.65, 1.0);              // Electric Cyan / Siri Sky Blue (top)
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord){
@@ -61,6 +65,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     p /= max(WAVE_SCALE, 0.1);
 
     float t   = iTime;
+    float ampMult = max(uAmplitude, 0.4);
     float low  = clamp(0.45 + 0.45*sin(t*0.8)*sin(t*0.37+1.0), 0.0, 1.0);
     float mid  = clamp(0.40 + 0.40*sin(t*1.7+2.0)*sin(t*0.53), 0.0, 1.0);
     float high = clamp(0.30 + 0.30*sin(t*2.9+4.0)*sin(t*0.71+2.0), 0.0, 1.0);
@@ -72,11 +77,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     float env = cos(PI*0.5 * min(abs(0.9*xN), 1.0));
     env *= env;
 
-    float A1    = AMPLITUDE + 0.01*low*LOW_AMP;
+    float A1    = (AMPLITUDE + 0.01*low*LOW_AMP) * ampMult;
     float A2    = A1 + mid*MID_ABAMP + high*HIGH_ABAMP;
     float AB    = (ABERRATION + mid*MID_ABER + high*HIGH_ABER)*res;
     float th    = mix(0.1, 0.01*THICKNESS, res);
-    float inten = mix(0.1, 0.01*(INTENSITY + low*LOW_INT), res);
+    float inten = mix(0.1, 0.01*(INTENSITY + low*LOW_INT), res) * (0.85 + 0.3*ampMult);
     float soft  = 0.01*res*max(0.0, SOFTNESS + mid*MID_SOFT);
 
     float dUnres = max(length(p) - mix(0.14, UNRES_SCALE, res), 0.0);
@@ -111,7 +116,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     float gauss = exp(-pow(xN*FALLOFF, 2.0));
     col *= mix(1.0, em*gauss, res);
     col *= res;
-    fragColor = vec4(col, 1.0);
+
+    // Smooth alpha transparency for seamless transparent background rendering
+    float alpha = clamp(max(col.r, max(col.g, col.b)) * 2.8, 0.0, 1.0);
+    fragColor = vec4(col, alpha);
 }
 void main(){ mainImage(gl_FragColor, gl_FragCoord.xy); }`
 
@@ -252,7 +260,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     col = min(col, 1.0);
     float n = fract(sin(dot(fragCoord, vec2(12.9898,78.233)))*43758.5453);
     col += (n - 0.5)/255.0;
-    fragColor = vec4(col, 1.0);
+    float alpha = clamp(max(col.r, max(col.g, col.b)) * 2.5, 0.0, 1.0);
+    fragColor = vec4(col, alpha);
 }
 void main(){ mainImage(gl_FragColor, gl_FragCoord.xy); }`
 
@@ -267,6 +276,12 @@ export interface SiriWaveProps
   variant?: SiriWaveVariant
   /** CSS display size of the square canvas, in px. */
   size?: number
+  /** CSS display width, in px. Takes precedence over size if specified. */
+  width?: number
+  /** CSS display height, in px. Takes precedence over size if specified. */
+  height?: number
+  /** Dynamic amplitude multiplier (e.g. driven by microphone audio level). */
+  amplitude?: number
   /** Internal render resolution multiplier (lower = cheaper/blurrier). */
   renderScale?: number
 }
@@ -274,18 +289,29 @@ export interface SiriWaveProps
 export function SiriWave({
   variant = "wave",
   size = 420,
-  renderScale = 0.75,
+  width,
+  height,
+  amplitude = 1.0,
+  renderScale = 0.85,
   className,
   style,
   ...props
 }: SiriWaveProps) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
+  const amplitudeRef = React.useRef(amplitude)
+
+  React.useEffect(() => {
+    amplitudeRef.current = amplitude
+  }, [amplitude])
 
   React.useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const gl = canvas.getContext("webgl")
+    const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false })
     if (!gl) return
+
+    gl.enable(gl.BLEND)
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
     const compile = (type: number, src: string) => {
       const shader = gl.createShader(type)!
@@ -320,11 +346,15 @@ export function SiriWave({
 
     const uResolution = gl.getUniformLocation(program, "iResolution")
     const uTime = gl.getUniformLocation(program, "iTime")
+    const uAmplitude = gl.getUniformLocation(program, "uAmplitude")
 
-    const dim = Math.round(size * renderScale)
-    canvas.width = dim
-    canvas.height = dim
-    gl.viewport(0, 0, dim, dim)
+    const w = width ?? size
+    const h = height ?? size
+    const wDim = Math.round(w * renderScale)
+    const hDim = Math.round(h * renderScale)
+    canvas.width = wDim
+    canvas.height = hDim
+    gl.viewport(0, 0, wDim, hDim)
 
     const start =
       typeof performance !== "undefined" ? performance.now() : Date.now()
@@ -333,8 +363,11 @@ export function SiriWave({
       const now =
         typeof performance !== "undefined" ? performance.now() : Date.now()
       const t = (now - start) / 1000
-      gl.uniform2f(uResolution, dim, dim)
+      gl.uniform2f(uResolution, wDim, hDim)
       gl.uniform1f(uTime, t)
+      if (uAmplitude) {
+        gl.uniform1f(uAmplitude, amplitudeRef.current ?? 1.0)
+      }
       gl.drawArrays(gl.TRIANGLES, 0, 3)
       raf = requestAnimationFrame(frame)
     }
@@ -347,13 +380,16 @@ export function SiriWave({
       gl.deleteShader(fs)
       gl.deleteBuffer(buffer)
     }
-  }, [variant, size, renderScale])
+  }, [variant, size, width, height, renderScale])
+
+  const w = width ?? size
+  const h = height ?? size
 
   return (
     <canvas
       ref={canvasRef}
-      className={cn("block rounded-[20px] bg-black", className)}
-      style={{ width: size, height: size, ...style }}
+      className={cn("block pointer-events-none mix-blend-screen bg-transparent", className)}
+      style={{ width: w, height: h, ...style }}
       {...props}
     />
   )

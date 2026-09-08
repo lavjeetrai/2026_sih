@@ -90,7 +90,7 @@ export function FixLedgerPortal({ user, onSelectConcern }: FixLedgerPortalProps)
   const [verifying, setVerifying] = useState(false);
   const [integrityReport, setIntegrityReport] = useState<IntegrityReport | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterTab, setFilterTab] = useState<"all" | "audited" | "tampered">("all");
+  const [filterTab, setFilterTab] = useState<"all" | "audits" | "tampered">("all");
   const [selectedBlock, setSelectedBlock] = useState<LedgerBlock | null>(null);
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
 
