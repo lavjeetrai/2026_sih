@@ -20,7 +20,7 @@ interface OfficerConcernHistoryProps {
   onLogNewConcern?: () => void;
 }
 
-export function OfficerConcernHistory({ user }: OfficerConcernHistoryProps) {
+export function OfficerConcernHistory({ user, onLogNewConcern }: OfficerConcernHistoryProps) {
   const [board, setBoard] = React.useState<ColumnData[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -28,42 +28,36 @@ export function OfficerConcernHistory({ user }: OfficerConcernHistoryProps) {
   const [expandedIds, setExpandedIds] = React.useState<Set<string>>(new Set());
   const [inspectCardInfo, setInspectCardInfo] = React.useState<{ card: CardData; columnTitle: string; columnId: string } | null>(null);
 
+  const fetchConcerns = React.useCallback(async () => {
+    if (!user?.email && !user?.name) {
+      setBoard([]);
+      setIsLoading(false);
+      return;
+    }
+    try {
+      const params = new URLSearchParams();
+      if (user.email) params.set("officerEmail", user.email);
+      if (user.name) params.set("officerName", user.name);
 
+      const res = await fetch(`/api/concerns?${params.toString()}`);
+      const json = await res.json();
+      if (json.success && Array.isArray(json.board)) {
+        setBoard(json.board);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch concerns history:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.email, user?.name]);
 
   React.useEffect(() => {
-    let isMounted = true;
-    const load = async () => {
-      if (!user?.email && !user?.name) {
-        if (isMounted) {
-          setBoard([]);
-          setIsLoading(false);
-        }
-        return;
-      }
-      try {
-        const params = new URLSearchParams();
-        if (user.email) params.set("officerEmail", user.email);
-        if (user.name) params.set("officerName", user.name);
-
-        const res = await fetch(`/api/concerns?${params.toString()}`);
-        const json = await res.json();
-        if (isMounted && json.success && Array.isArray(json.board)) {
-          setBoard(json.board);
-        }
-      } catch (err) {
-        console.warn("Failed to fetch concerns history:", err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    load();
-    const interval = setInterval(load, 5000);
+    fetchConcerns();
+    const interval = setInterval(fetchConcerns, 5000);
     return () => {
-      isMounted = false;
       clearInterval(interval);
     };
-  }, [user?.email, user?.name]);
+  }, [fetchConcerns]);
 
   // Flatten all cards with their current column context
   const allCards = React.useMemo(() => {
@@ -601,7 +595,8 @@ export function OfficerConcernHistory({ user }: OfficerConcernHistoryProps) {
           onClose={() => setInspectCardInfo(null)}
           onMoveColumn={() => {}}
           onDeleteCard={() => {}}
-          currentManager={null}
+          currentManager={user}
+          onUpdateCard={() => fetchConcerns()}
         />
       )}
     </div>

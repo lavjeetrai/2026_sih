@@ -20,6 +20,7 @@ import { BentoDashboard } from "@/components/ui/bento-dashboard";
 import { UserManagementPortal } from "@/components/ui/user-management-portal";
 import { OfficerConcernHistory } from "@/components/ui/officer-concern-history";
 import { OilSihLogo } from "@/components/ui/oil-sih-logo";
+import { FixLedgerPortal } from "@/components/ui/fix-ledger-portal";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 const BALL_SIZE = 380; // px — fixed diameter during Phase 1 travel
@@ -101,6 +102,8 @@ export default function InversionCircleScrollAnimation() {
                   user={userSession}
                   onLogNewConcern={() => setWorkerTab("Home")}
                 />
+              ) : workerTab === "FixLedger" ? (
+                <FixLedgerPortal user={userSession} />
               ) : (
                 <VercelV0Chat
                   user={userSession}
@@ -136,6 +139,8 @@ export default function InversionCircleScrollAnimation() {
                 <BentoDashboard />
               ) : managerTab === "Users" ? (
                 <UserManagementPortal currentManager={userSession} />
+              ) : managerTab === "FixLedger" ? (
+                <FixLedgerPortal user={userSession} />
               ) : (
                 <KanbanBoard user={userSession} />
               )}
