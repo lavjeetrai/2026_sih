@@ -50,8 +50,20 @@ export interface CardData {
   reviewer?: ReporterInfo;
   reportedAt?: string;
   llmSuggestions?: string[];
-  status?: "To Do" | "In Progress" | "Done";
+  status?: "To Do" | "In Progress" | "Done" | "Fix Deployed & Locked";
   columnId?: string;
+  ledgerLock?: {
+    isLocked: boolean;
+    blockIndex: number;
+    blockId: string;
+    ledgerHash: string;
+    lockedAt: string;
+    lockedByBadge: string;
+    lockedByName: string;
+    lockedByRole: string;
+    fiveWhysRca: string[];
+    engineeringFix: string;
+  };
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }
@@ -317,13 +329,19 @@ export async function saveBoard(board: ColumnData[]): Promise<void> {
     const concernsCol = db.collection("concerns");
     for (const col of cleanBoard) {
       for (const card of col.cards) {
+        // Exclude immutable _id field from MongoDB update payload
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { _id, ...cardDataToSave } = card as CardData & { _id?: unknown };
         await concernsCol.updateOne(
           { id: card.id },
           {
             $set: {
-              ...card,
+              ...cardDataToSave,
               columnId: col.id,
-              status: col.title as "To Do" | "In Progress" | "Done",
+              status:
+                card.status === "Fix Deployed & Locked"
+                  ? "Fix Deployed & Locked"
+                  : (col.title as "To Do" | "In Progress" | "Done"),
               updatedAt: new Date(),
             },
           },
