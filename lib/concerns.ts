@@ -33,6 +33,8 @@ export interface CardData {
   tasksTotal?: number;
   comments?: number;
   attachments?: number;
+  voiceNoteUrl?: string;
+  hasVoiceRecording?: boolean;
   coverImage?: string;
   // Structured safety fields
   observation?: string;
@@ -77,6 +79,7 @@ export interface WorkerConcernPayload {
   critical_barrier_failure?: boolean;
   inference_engine?: "modal" | "ollama" | "fallback";
   reporter?: string | Partial<ReporterInfo>;
+  voiceNoteUrl?: string;
 }
 
 // Clean production board schema for OIL India HSE Operations (no mock seed cards)
@@ -357,6 +360,12 @@ export async function addConcernFromWorker(payload: WorkerConcernPayload): Promi
   const score = payload.sif_score ?? 0;
   const priority: Priority = score >= 70 ? "High" : score >= 40 ? "Medium" : "Low";
 
+  // Intelligent Automation: If SIF Score > 75 (high fatal potential event),
+  // automatically escalate and route directly to 'In Progress' (col-2) for immediate intervention
+  const isAutoEscalated = score > 75;
+  const targetStatus: "To Do" | "In Progress" = isAutoEscalated ? "In Progress" : "To Do";
+  const targetColumnId: string = isAutoEscalated ? "col-2" : "col-1";
+
   // Meaningful full card title without truncation
   let cardTitle = payload.hazard?.trim();
   if (!cardTitle || cardTitle.length < 3) {
@@ -387,6 +396,12 @@ export async function addConcernFromWorker(payload: WorkerConcernPayload): Promi
   const description = descParts.join(" | ");
 
   const tags: Tag[] = [];
+  if (isAutoEscalated) {
+    tags.push({
+      label: "⚡ Auto-Escalated (SIF > 75)",
+      dotColor: "bg-red-600",
+    });
+  }
   if (payload.hazard) {
     tags.push({
       label: payload.hazard.replace(/\(.*\)/, "").trim(),
@@ -402,6 +417,13 @@ export async function addConcernFromWorker(payload: WorkerConcernPayload): Promi
     tags.push({
       label: "Worker Log",
       dotColor: "bg-purple-500",
+    });
+  }
+
+  if (payload.voiceNoteUrl) {
+    tags.push({
+      label: "🎙️ Spoken Note",
+      dotColor: "bg-emerald-500",
     });
   }
 
@@ -421,7 +443,9 @@ export async function addConcernFromWorker(payload: WorkerConcernPayload): Promi
     priority,
     date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     comments: 0,
-    attachments: 0,
+    attachments: payload.voiceNoteUrl ? 1 : 0,
+    voiceNoteUrl: payload.voiceNoteUrl,
+    hasVoiceRecording: Boolean(payload.voiceNoteUrl),
     avatars: [
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
     ],
@@ -462,8 +486,8 @@ export async function addConcernFromWorker(payload: WorkerConcernPayload): Promi
           },
     reviewer: undefined,
     llmSuggestions,
-    status: "To Do",
-    columnId: "col-1",
+    status: targetStatus,
+    columnId: targetColumnId,
     createdAt: new Date().toISOString(),
   };
 
@@ -475,9 +499,16 @@ export async function addConcernFromWorker(payload: WorkerConcernPayload): Promi
     console.warn("[concerns] Failed to insert card into concerns collection in Atlas:", err);
   }
 
-  // 2. Add to "col-1" (To Do) at the very top of the board
+  // 2. Add to target column at the very top of the board:
+  // If SIF > 75, automatically placed in 'In Progress' (col-2); otherwise placed in 'To Do' (col-1).
+  let placedInTargetCol = false;
   const updatedBoard = board.map((col) => {
-    if (col.id === "col-1" || col.title.toLowerCase().includes("to do")) {
+    const isTarget = isAutoEscalated
+      ? col.id === "col-2" || col.title.toLowerCase().includes("in progress")
+      : col.id === "col-1" || col.title.toLowerCase().includes("to do");
+
+    if (isTarget && !placedInTargetCol) {
+      placedInTargetCol = true;
       return {
         ...col,
         cards: [newCard, ...col.cards],
@@ -485,6 +516,15 @@ export async function addConcernFromWorker(payload: WorkerConcernPayload): Promi
     }
     return col;
   });
+
+  // Fallback if target column not found by ID or title in board
+  if (!placedInTargetCol && updatedBoard.length > 0) {
+    const fallbackIdx = isAutoEscalated && updatedBoard.length > 1 ? 1 : 0;
+    updatedBoard[fallbackIdx] = {
+      ...updatedBoard[fallbackIdx],
+      cards: [newCard, ...updatedBoard[fallbackIdx].cards],
+    };
+  }
 
   // 3. Persist to MongoDB Atlas board_state and local sync
   await saveBoard(updatedBoard);
