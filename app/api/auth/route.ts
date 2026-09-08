@@ -7,17 +7,26 @@ import {
   rejectUserRequest,
   updateUserProfile,
   getApprovalsRegistry,
-  type UserDocument,
-} from "@/lib/users";
+  migrateUserPassword,
+  sanitizeUser,
+} from "@/lib/data/users";
+import {
+  verifyPassword,
+  hashPassword,
+  setSessionCookie,
+  clearSessionCookie,
+  getSessionUser,
+} from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 /**
  * GET /api/auth
  * Query options:
- * - ?type=pending: lists all unverified account requests
- * - ?type=all: lists all users
- * - ?type=registry: lists the permanent manager approval audit logs
+ * - ?type=session | me: returns the authenticated user session (without credentials)
+ * - ?type=pending: lists all unverified account requests (Manager only)
+ * - ?type=all: lists all users (passwords omitted)
+ * - ?type=registry: lists the permanent manager approval audit logs (Manager only)
  * - default: returns summary counts & system auth status
  */
 export async function GET(req: Request) {
@@ -25,22 +34,57 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const type = searchParams.get("type");
 
+    // Session check for client verification
+    if (type === "session" || type === "me") {
+      const sessionUser = await getSessionUser(req);
+      if (!sessionUser) {
+        return NextResponse.json(
+          { success: false, authenticated: false, error: "No active session" },
+          { status: 401 }
+        );
+      }
+      return NextResponse.json({
+        success: true,
+        authenticated: true,
+        user: sanitizeUser(sessionUser),
+      });
+    }
+
+    // Role-protected endpoints: require active Manager session
+    if (type === "pending" || type === "registry") {
+      const sessionUser = await getSessionUser(req);
+      if (!sessionUser) {
+        return NextResponse.json(
+          { success: false, error: "Authentication required" },
+          { status: 401 }
+        );
+      }
+      if (sessionUser.role !== "manager") {
+        return NextResponse.json(
+          { success: false, error: "Access denied. Manager role required." },
+          { status: 403 }
+        );
+      }
+
+      if (type === "pending") {
+        const allUsers = await getAllUsers();
+        const pending = allUsers
+          .filter((u) => u.status === "pending")
+          .map(sanitizeUser);
+        return NextResponse.json({ success: true, count: pending.length, data: pending });
+      }
+
+      if (type === "registry") {
+        const registry = await getApprovalsRegistry();
+        return NextResponse.json({ success: true, count: registry.length, data: registry });
+      }
+    }
+
     const allUsers = await getAllUsers();
 
-    if (type === "pending") {
-      const pending = allUsers.filter((u) => u.status === "pending");
-      return NextResponse.json({ success: true, count: pending.length, data: pending });
-    }
-
     if (type === "all") {
-      // Omit passwords from client response
-      const sanitized = allUsers.map(({ password, ...rest }) => rest);
+      const sanitized = allUsers.map(sanitizeUser);
       return NextResponse.json({ success: true, count: sanitized.length, data: sanitized });
-    }
-
-    if (type === "registry") {
-      const registry = await getApprovalsRegistry();
-      return NextResponse.json({ success: true, count: registry.length, data: registry });
     }
 
     const pendingCount = allUsers.filter((u) => u.status === "pending").length;
@@ -62,9 +106,11 @@ export async function GET(req: Request) {
  * POST /api/auth
  * Actions:
  * - action: "signup" -> Submits an unverified registration request (status: "pending")
- * - action: "signin" -> Verifies credentials and ensures account is approved by a manager
- * - action: "approve" -> Existing Manager approves an applicant as Field Officer or Manager
- * - action: "reject" -> Existing Manager declines an applicant
+ * - action: "signin" -> Verifies password against scrypt hash and sets HTTP-only session cookie
+ * - action: "signout" -> Clears HTTP-only session cookie
+ * - action: "approve" -> Authorized HSE Manager approves applicant
+ * - action: "reject" -> Authorized HSE Manager declines applicant
+ * - action: "update_profile" -> Updates own profile
  */
 export async function POST(req: Request) {
   try {
@@ -86,7 +132,6 @@ export async function POST(req: Request) {
         avatarUrl,
       } = body;
 
-      // Validate all required user inputs
       if (!name || !name.trim()) {
         return NextResponse.json(
           { success: false, error: "Full Name is required." },
@@ -162,33 +207,48 @@ export async function POST(req: Request) {
         success: true,
         status: "pending",
         message: "Registration request submitted. An existing HSE Manager will verify and approve your account.",
-        user: {
-          name: newUser.name,
-          email: newUser.email,
-          role: newUser.role,
-          badgeId: newUser.badgeId,
-          designation: newUser.designation,
-          station: newUser.station,
-          radioChannel: newUser.radioChannel,
-          phone: newUser.phone,
-          status: newUser.status,
-          avatarUrl: newUser.avatarUrl,
-        },
+        user: sanitizeUser(newUser),
       });
     }
 
     // ─── 2. SIGN IN ────────────────────────────────────────────────────
     if (action === "signin") {
-      const { email, password, role } = body;
+      const { email, password } = body;
       const cleanEmail = (email || "").toLowerCase().trim();
+
+      if (!cleanEmail || !password) {
+        return NextResponse.json(
+          { success: false, error: "Email and password are required." },
+          { status: 400 }
+        );
+      }
 
       const user = await getUserByEmail(cleanEmail);
 
-      if (!user || user.password !== password) {
+      if (!user) {
         return NextResponse.json(
           { success: false, error: "Invalid email or password. Please verify your credentials." },
           { status: 401 }
         );
+      }
+
+      const { valid, needsMigration } = verifyPassword(password, user.password || "");
+
+      if (!valid) {
+        return NextResponse.json(
+          { success: false, error: "Invalid email or password. Please verify your credentials." },
+          { status: 401 }
+        );
+      }
+
+      // Lazy migration: upgrade legacy plaintext password to secure scrypt hash upon successful auth
+      if (needsMigration) {
+        try {
+          const newHashed = hashPassword(password);
+          await migrateUserPassword(cleanEmail, newHashed);
+        } catch (migErr) {
+          console.warn("[Auth] Lazy password migration note:", migErr);
+        }
       }
 
       // Gatekeeping: Check account verification status
@@ -214,29 +274,44 @@ export async function POST(req: Request) {
         );
       }
 
-      const activeRole = role || user.role;
-
-      return NextResponse.json({
+      const sanitized = sanitizeUser(user);
+      const res = NextResponse.json({
         success: true,
-        user: {
-          name: user.name,
-          email: user.email,
-          role: activeRole,
-          badgeId: user.badgeId,
-          designation: user.designation,
-          station: user.station,
-          radioChannel: user.radioChannel,
-          phone: user.phone,
-          avatarUrl: user.avatarUrl,
-          status: user.status,
-          approval: user.approval,
-        },
+        user: sanitized,
       });
+
+      // Set server-verifiable HTTP-only session cookie
+      setSessionCookie(res, { email: user.email, role: user.role });
+      return res;
     }
 
-    // ─── 3. MANAGER APPROVE APPLICANT ──────────────────────────────────
+    // ─── 3. SIGN OUT ───────────────────────────────────────────────────
+    if (action === "signout") {
+      const res = NextResponse.json({
+        success: true,
+        message: "Signed out successfully.",
+      });
+      clearSessionCookie(res);
+      return res;
+    }
+
+    // ─── 4. MANAGER APPROVE APPLICANT ──────────────────────────────────
     if (action === "approve") {
-      const { userEmail, assignedRole, manager, remarks } = body;
+      const sessionUser = await getSessionUser(req);
+      if (!sessionUser) {
+        return NextResponse.json(
+          { success: false, error: "Authentication required." },
+          { status: 401 }
+        );
+      }
+      if (sessionUser.role !== "manager") {
+        return NextResponse.json(
+          { success: false, error: "Access denied. Only an authorized HSE Manager can approve accounts." },
+          { status: 403 }
+        );
+      }
+
+      const { userEmail, assignedRole, remarks } = body;
 
       if (!userEmail) {
         return NextResponse.json(
@@ -252,11 +327,12 @@ export async function POST(req: Request) {
         );
       }
 
-      const approvingManager = manager || {
-        name: "Priyanka Bora",
-        badgeId: "OIL-MGR-1002",
-        email: "priyanka@oilindia.in",
-        designation: "Chief General Manager (Process Safety & SIF Control)",
+      // Security: derive approving manager identity strictly from server-side session
+      const approvingManager = {
+        name: sessionUser.name,
+        badgeId: sessionUser.badgeId || "OIL-MGR",
+        email: sessionUser.email,
+        designation: sessionUser.designation || "HSE Operations Manager",
       };
 
       const updatedUser = await approveUserRequest({
@@ -269,24 +345,27 @@ export async function POST(req: Request) {
       return NextResponse.json({
         success: true,
         message: `Successfully approved ${updatedUser.name} as ${assignedRole === "manager" ? "HSE Manager" : "Field Safety Officer"}.`,
-        user: {
-          name: updatedUser.name,
-          email: updatedUser.email,
-          role: updatedUser.role,
-          badgeId: updatedUser.badgeId,
-          designation: updatedUser.designation,
-          station: updatedUser.station,
-          radioChannel: updatedUser.radioChannel,
-          phone: updatedUser.phone,
-          status: updatedUser.status,
-          approval: updatedUser.approval,
-        },
+        user: sanitizeUser(updatedUser),
       });
     }
 
-    // ─── 4. MANAGER REJECT APPLICANT ──────────────────────────────────
+    // ─── 5. MANAGER REJECT APPLICANT ──────────────────────────────────
     if (action === "reject") {
-      const { userEmail, manager, reason } = body;
+      const sessionUser = await getSessionUser(req);
+      if (!sessionUser) {
+        return NextResponse.json(
+          { success: false, error: "Authentication required." },
+          { status: 401 }
+        );
+      }
+      if (sessionUser.role !== "manager") {
+        return NextResponse.json(
+          { success: false, error: "Access denied. Only an authorized HSE Manager can reject accounts." },
+          { status: 403 }
+        );
+      }
+
+      const { userEmail, reason } = body;
 
       if (!userEmail) {
         return NextResponse.json(
@@ -295,10 +374,11 @@ export async function POST(req: Request) {
         );
       }
 
-      const rejectingManager = manager || {
-        name: "Priyanka Bora",
-        badgeId: "OIL-MGR-1002",
-        email: "priyanka@oilindia.in",
+      // Security: derive rejecting manager identity strictly from server-side session
+      const rejectingManager = {
+        name: sessionUser.name,
+        badgeId: sessionUser.badgeId || "OIL-MGR",
+        email: sessionUser.email,
       };
 
       const updatedUser = await rejectUserRequest({
@@ -310,23 +390,34 @@ export async function POST(req: Request) {
       return NextResponse.json({
         success: true,
         message: `Account request for ${updatedUser.name} has been rejected.`,
-        user: {
-          name: updatedUser.name,
-          email: updatedUser.email,
-          status: updatedUser.status,
-          rejectionReason: updatedUser.rejectionReason,
-        },
+        user: sanitizeUser(updatedUser),
       });
     }
 
-    // ─── 5. UPDATE PROFILE (LOGGED IN USER) ──────────────────────────
+    // ─── 6. UPDATE PROFILE (LOGGED IN USER) ──────────────────────────
     if (action === "update_profile") {
+      const sessionUser = await getSessionUser(req);
+      if (!sessionUser) {
+        return NextResponse.json(
+          { success: false, error: "Authentication required." },
+          { status: 401 }
+        );
+      }
+
       const { email, name, designation, station, radioChannel, phone, avatarUrl } = body;
 
       if (!email) {
         return NextResponse.json(
           { success: false, error: "User email is required to update profile." },
           { status: 400 }
+        );
+      }
+
+      // Security: users may only update their own profile unless they have manager role
+      if (sessionUser.email.toLowerCase() !== email.toLowerCase().trim() && sessionUser.role !== "manager") {
+        return NextResponse.json(
+          { success: false, error: "Access denied. You can only update your own profile." },
+          { status: 403 }
         );
       }
 
@@ -343,19 +434,7 @@ export async function POST(req: Request) {
       return NextResponse.json({
         success: true,
         message: "Profile updated successfully.",
-        user: {
-          name: updatedUser.name,
-          email: updatedUser.email,
-          role: updatedUser.role,
-          badgeId: updatedUser.badgeId,
-          designation: updatedUser.designation,
-          station: updatedUser.station,
-          radioChannel: updatedUser.radioChannel,
-          phone: updatedUser.phone,
-          avatarUrl: updatedUser.avatarUrl,
-          status: updatedUser.status,
-          approval: updatedUser.approval,
-        },
+        user: sanitizeUser(updatedUser),
       });
     }
 

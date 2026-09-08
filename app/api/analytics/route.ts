@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
-import { getBoard, CardData } from "@/lib/concerns";
-import { mapToLifeSavingRule } from "@/lib/lsr";
+import { getBoard } from "@/lib/data/concerns";
+import { mapToLifeSavingRule } from "@/lib/safety";
+import { extractWarningPatterns } from "@/lib/patterns";
+import { calculateSiteHsePriorityScore } from "@/lib/prioritization";
+import type { CardData, WarningPatternRecord } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -38,15 +41,27 @@ export interface AssetCategoryItem {
   description: string;
 }
 
+export interface PriorityFactors {
+  criticalPrecursorCount: number;
+  highPriorityPatternCount: number;
+  moderatePrecursorCount: number;
+  averageSifScore: number;
+  totalReports: number;
+  factorExplanation: string;
+}
+
 export interface OperationalSiteItem {
   id: string;
   name: string;
   basin: string;
-  sensors: number;
+  sensors?: number;
   status: "Normal" | "Watch" | "Critical";
   incidentCount: number;
   badge?: string;
   coordinates: { x: number; y: number };
+  hsePriorityScore?: number;
+  priorityLevel?: "CRITICAL" | "HIGH" | "ELEVATED" | "ROUTINE";
+  priorityFactors?: PriorityFactors;
 }
 
 export interface TrendPointItem {
@@ -203,10 +218,10 @@ export async function GET(req: Request) {
       }
     }
 
-    const totalAssets = Math.max(1, rigCount + stationCount + pipelineCount);
-    const rigPct = Math.round((rigCount / totalAssets) * 100) || 60;
-    const stationPct = Math.round((stationCount / totalAssets) * 100) || 25;
-    const pipelinePct = 100 - rigPct - stationPct;
+    const totalAssets = rigCount + stationCount + pipelineCount;
+    const rigPct = totalAssets > 0 ? Math.round((rigCount / totalAssets) * 100) : 0;
+    const stationPct = totalAssets > 0 ? Math.round((stationCount / totalAssets) * 100) : 0;
+    const pipelinePct = totalAssets > 0 ? Math.max(0, 100 - rigPct - stationPct) : 0;
 
     const assetCategories: AssetCategoryItem[] = [
       {
@@ -216,7 +231,7 @@ export async function GET(req: Request) {
         count: rigCount,
         color: "#4C6EF5",
         accentColor: "#3B5BDB",
-        description: "Moran Rig-04 & Drilling Operations",
+        description: "Moran Rig-04 & Rig Operations",
       },
       {
         id: "stations",
@@ -230,7 +245,7 @@ export async function GET(req: Request) {
       {
         id: "pipelines",
         label: "Corridor Pipelines",
-        percentage: Math.max(5, pipelinePct),
+        percentage: pipelinePct,
         count: pipelineCount,
         color: "#FF8A7A",
         accentColor: "#E04838",
@@ -238,14 +253,23 @@ export async function GET(req: Request) {
       },
     ];
 
-    // ─── 4. OPERATIONAL SITES TELEMETRY (Map & Active List real data) ───────
-    const baseSites: { id: string; name: string; basin: string; sensors: number; coordinates: { x: number; y: number } }[] = [
-      { id: "moran", name: "Moran Rig #04 (Assam Basin)", basin: "Assam Shelf", sensors: 4125, coordinates: { x: 62, y: 38 } },
-      { id: "nhkt", name: "Naharkatiya OCS-1 (Crude Gathering)", basin: "Upper Assam", sensors: 1014, coordinates: { x: 54, y: 52 } },
-      { id: "duliajan", name: "Duliajan Central GGS (Gas Processing)", basin: "HQ Sector", sensors: 815, coordinates: { x: 70, y: 48 } },
-      { id: "digboi", name: "Digboi Field Station (Historic Complex)", basin: "Digboi Thrust", sensors: 724, coordinates: { x: 80, y: 32 } },
-      { id: "pipeline4b", name: "Pipeline Corridor 4B (River Crossing)", basin: "Brahmaputra", sensors: 324, coordinates: { x: 42, y: 64 } },
-      { id: "kumchai", name: "Kumchai Gas Field (Arunachal Foothills)", basin: "Fold Belt", sensors: 105, coordinates: { x: 88, y: 22 } },
+    // ─── 4. CROSS-REPORT RECURRING WARNING PATTERNS ────────────────────────
+    let warningPatterns: WarningPatternRecord[] = [];
+    try {
+      const patternResult = await extractWarningPatterns(allCards);
+      warningPatterns = patternResult.patterns;
+    } catch (err) {
+      console.warn("[analytics] Warning pattern extraction warning:", err);
+    }
+
+    // ─── 5. OPERATIONAL SITES TELEMETRY & HSE PRIORITY SCORING ──────────────
+    const baseSites = [
+      { id: "moran", name: "Moran Rig #04 (Assam Basin)", basin: "Assam Shelf", coordinates: { x: 62, y: 38 } },
+      { id: "nhkt", name: "Naharkatiya OCS-1 (Crude Gathering)", basin: "Upper Assam", coordinates: { x: 54, y: 52 } },
+      { id: "duliajan", name: "Duliajan Central GGS (Gas Processing)", basin: "HQ Sector", coordinates: { x: 70, y: 48 } },
+      { id: "digboi", name: "Digboi Field Station (Historic Complex)", basin: "Digboi Thrust", coordinates: { x: 80, y: 32 } },
+      { id: "pipeline4b", name: "Pipeline Corridor 4B (River Crossing)", basin: "Brahmaputra", coordinates: { x: 42, y: 64 } },
+      { id: "kumchai", name: "Kumchai Gas Field (Arunachal Foothills)", basin: "Fold Belt", coordinates: { x: 88, y: 22 } },
     ];
 
     const operationalSites: OperationalSiteItem[] = baseSites.map((site) => {
@@ -256,22 +280,63 @@ export async function GET(req: Request) {
         if (site.id === "duliajan" && text.includes("duliajan")) return true;
         if (site.id === "digboi" && text.includes("digboi")) return true;
         if (site.id === "pipeline4b" && text.includes("pipeline")) return true;
+        if (site.id === "kumchai" && text.includes("kumchai")) return true;
         return false;
       });
 
-      const hasCritical = siteCards.some((c) => (c.sif_score ?? 0) >= 70);
-      const hasModerate = siteCards.some((c) => (c.sif_score ?? 0) >= 40);
+      const criticalPrecursorCount = siteCards.filter((c) => (c.sif_score ?? 0) >= 70).length;
+      const moderatePrecursorCount = siteCards.filter((c) => (c.sif_score ?? 0) >= 40 && (c.sif_score ?? 0) < 70).length;
 
-      const status: "Normal" | "Watch" | "Critical" = hasCritical ? "Critical" : hasModerate ? "Watch" : "Normal";
+      // Match high priority patterns involving this installation
+      const sitePatternMatches = warningPatterns.filter((p) => {
+        return (p.locations || []).some((loc) => {
+          const l = loc.toLowerCase();
+          return l.includes(site.id) || l.includes(site.name.toLowerCase().split(" ")[0]);
+        });
+      });
+      const highPriorityPatternCount = sitePatternMatches.filter((p) => p.hsePriority === "HIGH").length;
+
+      const avgSifScore = siteCards.length > 0
+        ? Math.round(siteCards.reduce((acc, c) => acc + (c.sif_score ?? 0), 0) / siteCards.length)
+        : 0;
+
+      const { hsePriorityScore, priorityLevel, status } = calculateSiteHsePriorityScore({
+        criticalPrecursorCount,
+        moderatePrecursorCount,
+        highPriorityPatternCount,
+        avgSifScore,
+        totalSiteReports: siteCards.length,
+      });
+
+      const factorParts: string[] = [];
+      if (criticalPrecursorCount > 0) factorParts.push(`${criticalPrecursorCount} Critical Precursor(s) [Score ≥ 70]`);
+      if (highPriorityPatternCount > 0) factorParts.push(`${highPriorityPatternCount} High-Priority Warning Pattern(s)`);
+      if (moderatePrecursorCount > 0) factorParts.push(`${moderatePrecursorCount} Moderate Precursor(s)`);
+      if (avgSifScore >= 65) factorParts.push(`Elevated Site Avg SIF (${avgSifScore}/100)`);
+      if (siteCards.length > 0) factorParts.push(`${siteCards.length} Total Report(s) Analyzed`);
+
+      const factorExplanation = factorParts.length > 0
+        ? `HSE Intervention Priority: ${factorParts.join("; ")}. (Ranked by precursor intervention priority, not event probability).`
+        : "Routine monitoring: no precursor anomalies or recurring patterns detected.";
 
       return {
         ...site,
         status,
         incidentCount: siteCards.length,
+        hsePriorityScore,
+        priorityLevel,
+        priorityFactors: {
+          criticalPrecursorCount,
+          highPriorityPatternCount,
+          moderatePrecursorCount,
+          averageSifScore: avgSifScore,
+          totalReports: siteCards.length,
+          factorExplanation,
+        },
       };
     });
 
-    // ─── 5. TREND TIMELINE (Dual Spline Curve real data) ────────────────────
+    // ─── 5. TREND TIMELINE (Actual stored records aggregation) ──────────────
     const trendTimeline: TrendPointItem[] = [];
 
     if (timeframe === "day") {
@@ -296,8 +361,8 @@ export async function GET(req: Request) {
         trendTimeline.push({
           date: h.date,
           label: h.label,
-          current: Math.max(cardMatch * 28 + 14, 8),
-          previous: Math.max(cardMatch * 18 + 9, 5),
+          current: cardMatch,
+          previous: 0,
         });
       }
     } else if (timeframe === "month") {
@@ -311,7 +376,7 @@ export async function GET(req: Request) {
       for (const w of weeks) {
         const count = allCards.filter((c) => {
           const ep = getCardEpoch(c);
-          if (ep === 0) return true;
+          if (ep === 0) return false;
           const d = new Date(ep);
           return d.getDate() >= w.minDay && d.getDate() <= w.maxDay;
         }).length;
@@ -319,22 +384,22 @@ export async function GET(req: Request) {
         trendTimeline.push({
           date: w.date,
           label: w.label,
-          current: Math.max(count * 820 + 2400, 1200),
-          previous: Math.max(count * 640 + 1900, 950),
+          current: count,
+          previous: 0,
         });
       }
     } else if (timeframe === "year") {
       const quarters = [
-        { date: "Q1", label: "Q1 Zero-SIF Mandate", months: [0, 1, 2] },
-        { date: "Q2", label: "Q2 Monsoon Barrier Prep", months: [3, 4, 5] },
-        { date: "Q3", label: "Q3 Asset Integrity Cycle", months: [6, 7, 8] },
-        { date: "Q4", label: "Q4 Annual HSE Certification", months: [9, 10, 11] },
+        { date: "Q1", label: "Q1 Mandate", months: [0, 1, 2] },
+        { date: "Q2", label: "Q2 Monsoon Prep", months: [3, 4, 5] },
+        { date: "Q3", label: "Q3 Integrity Cycle", months: [6, 7, 8] },
+        { date: "Q4", label: "Q4 HSE Review", months: [9, 10, 11] },
       ];
 
       for (const q of quarters) {
         const count = allCards.filter((c) => {
           const ep = getCardEpoch(c);
-          if (ep === 0) return true;
+          if (ep === 0) return false;
           const d = new Date(ep);
           return q.months.includes(d.getMonth());
         }).length;
@@ -342,8 +407,8 @@ export async function GET(req: Request) {
         trendTimeline.push({
           date: q.date,
           label: q.label,
-          current: Math.max(count * 2400 + 7800, 3200),
-          previous: Math.max(count * 1900 + 6400, 2600),
+          current: count,
+          previous: 0,
         });
       }
     } else {
@@ -370,13 +435,13 @@ export async function GET(req: Request) {
         trendTimeline.push({
           date: dateStr,
           label: `${dayName} HSE Log`,
-          current: Math.max(currentCount * 420 + 380, currentCount > 0 ? 850 : 210),
-          previous: Math.max(currentCount * 290 + 260, 180),
+          current: currentCount,
+          previous: 0,
         });
       }
     }
 
-    // ─── 6. REAL EXECUTIVE KPIS ─────────────────────────────────────────────
+    // ─── 6. REAL EXECUTIVE KPIS & HSE PRIORITY RANKING ─────────────────────
     const totalReports = allCards.length;
     const criticalPrecursors = allCards.filter((c) => (c.sif_score ?? 0) >= 70).length;
     const avgSifScore =
@@ -384,21 +449,62 @@ export async function GET(req: Request) {
         ? Math.round(allCards.reduce((acc, c) => acc + (c.sif_score ?? 0), 0) / allCards.length)
         : 0;
 
-    // Highest risk site from actual concern logs
-    const siteWithMostConcerns = [...operationalSites].sort((a, b) => b.incidentCount - a.incidentCount)[0];
-    const highestRiskSite = siteWithMostConcerns && siteWithMostConcerns.incidentCount > 0
-      ? siteWithMostConcerns.name.split(" ")[0] + " " + siteWithMostConcerns.name.split(" ")[1]
-      : "Moran Rig-04";
+    // Highest Priority Site ranked by HSE Priority Score (precursor severity over volume)
+    const sitesByPriority = [...operationalSites].sort((a, b) => (b.hsePriorityScore ?? 0) - (a.hsePriorityScore ?? 0));
+    const highestPrioritySiteObj = sitesByPriority[0];
+    const hasPriorityData = highestPrioritySiteObj && (highestPrioritySiteObj.hsePriorityScore ?? 0) > 0;
+
+    const highestPrioritySite = hasPriorityData
+      ? {
+          name: highestPrioritySiteObj.name,
+          displayName: highestPrioritySiteObj.name.split("(")[0].trim(),
+          hsePriorityScore: highestPrioritySiteObj.hsePriorityScore ?? 0,
+          priorityLevel: highestPrioritySiteObj.priorityLevel ?? "ROUTINE",
+          rationale: highestPrioritySiteObj.priorityFactors?.factorExplanation || "",
+          factors: {
+            criticalPrecursors: highestPrioritySiteObj.priorityFactors?.criticalPrecursorCount ?? 0,
+            highPriorityPatterns: highestPrioritySiteObj.priorityFactors?.highPriorityPatternCount ?? 0,
+            moderatePrecursors: highestPrioritySiteObj.priorityFactors?.moderatePrecursorCount ?? 0,
+            avgSifScore: highestPrioritySiteObj.priorityFactors?.averageSifScore ?? 0,
+            totalReports: highestPrioritySiteObj.incidentCount ?? 0,
+          },
+          explanation: `${highestPrioritySiteObj.priorityFactors?.criticalPrecursorCount ?? 0} critical precursor(s), ${highestPrioritySiteObj.priorityFactors?.highPriorityPatternCount ?? 0} pattern(s)`,
+        }
+      : {
+          name: totalReports === 0 ? "Insufficient data" : "None flagged",
+          displayName: totalReports === 0 ? "No data" : "None flagged",
+          hsePriorityScore: 0,
+          priorityLevel: "ROUTINE" as const,
+          rationale: "No critical precursors or recurring warning patterns detected across installations.",
+          factors: {
+            criticalPrecursors: 0,
+            highPriorityPatterns: 0,
+            moderatePrecursors: 0,
+            avgSifScore: 0,
+            totalReports: 0,
+          },
+          explanation: "All monitored sites within baseline tolerances",
+        };
+
+    const highestRiskSite = highestPrioritySite.displayName;
+    const hasSufficientData = totalReports > 0;
+
+    const highPriorityCount = warningPatterns.filter((p) => p.hsePriority === "HIGH").length;
+    const mediumPriorityCount = warningPatterns.filter((p) => p.hsePriority === "MEDIUM").length;
+    const lowPriorityCount = warningPatterns.filter((p) => p.hsePriority === "LOW").length;
+    const crossSiteCount = warningPatterns.filter((p) => p.patternScope === "CROSS_SITE").length;
 
     return NextResponse.json({
       success: true,
       timeframe,
       timeframeLabel,
+      hasSufficientData,
       kpis: {
         totalReports,
         criticalPrecursors,
         avgSifScore,
         highestRiskSite,
+        highestPrioritySite,
         todoCount,
         inProgressCount,
         doneCount,
@@ -407,6 +513,15 @@ export async function GET(req: Request) {
       assetCategories,
       operationalSites,
       trendTimeline,
+      warningPatterns,
+      patternSummary: {
+        totalDetected: warningPatterns.length,
+        highPriority: highPriorityCount,
+        mediumPriority: mediumPriorityCount,
+        lowPriority: lowPriorityCount,
+        crossSite: crossSiteCount,
+        hasPatterns: warningPatterns.length > 0,
+      },
       dataSource: "OIL India HSE Registry & MongoDB Atlas",
       recordCount: allCards.length,
     });

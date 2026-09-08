@@ -3,7 +3,7 @@
     "_id": "6a9d58b1d33fba34a94f6b86",
     "name": "Lav Kumar",
     "email": "lav@gmail.com",
-    "password": "123456",
+    "password": "scrypt:92f2110184541ca0ab8261f9da99c4d9:dc97afb4c86e797b1a4f94ee90add3da8ab4c459069cfb5d28419bf793bd64f0f2dc5367ff4a297208533ad43d4dc89916bd38ddfbef199c24a589ad373a7ecf",
     "role": "worker",
     "requestedRole": "worker",
     "badgeId": "OIL-FLD-5542",
@@ -23,13 +23,13 @@
       "remarks": "Verified field competencies and rig safety clearance."
     },
     "createdAt": "2026-09-01T09:00:00.000Z",
-    "updatedAt": "2026-09-01T09:30:00.000Z"
+    "updatedAt": "2026-09-07T21:50:08.490Z"
   },
   {
     "_id": "6a9d58b1d33fba34a94f6b87",
     "name": "Priyanka Bora",
     "email": "priyanka@oilindia.in",
-    "password": "123456",
+    "password": "scrypt:a5532fccafd6375cae71c8b1d50e307f:8c9e311951733a8384096a257e3b9735ed7128e8168c5c797621c5fa36c96a803f100dd36b188d197ea521c4462edef5074b7e436e49f741ecb2cb70f9fc7bfa",
     "role": "manager",
     "requestedRole": "manager",
     "badgeId": "OIL-MGR-1002",
@@ -49,7 +49,7 @@
       "remarks": "Corporate HSE Manager Clearance Authorization."
     },
     "createdAt": "2026-08-15T09:00:00.000Z",
-    "updatedAt": "2026-08-15T10:00:00.000Z"
+    "updatedAt": "2026-09-08T06:41:50.243Z"
   },
   {
     "_id": "6a9d58b1d33fba34a94f6b88",

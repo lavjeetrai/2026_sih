@@ -4,6 +4,160 @@
     "title": "To Do",
     "cards": [
       {
+        "id": "worker-concern-1788849762804-t9f78",
+        "title": "Operational Safety Hazard — Driller noticed pressure gauge fluctuating erratically on choke manifold",
+        "description": "Quote: \"Driller noticed pressure gauge fluctuating erratically on choke manifold\" | Failed Barrier: Safety Barrier Control",
+        "tags": [
+          {
+            "label": "Operational Safety Hazard",
+            "dotColor": "bg-blue-500"
+          },
+          {
+            "label": "SIF 35",
+            "dotColor": "bg-blue-500"
+          }
+        ],
+        "priority": "High",
+        "date": "Sep 8",
+        "comments": 0,
+        "attachments": 0,
+        "avatars": [
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "Driller noticed pressure gauge fluctuating erratically on choke manifold",
+        "hazard": "High Pressure Wellhead Choke Manifold",
+        "possible_consequence": "Catastrophic wellhead rupture and toxic pressurized oil spray",
+        "failed_barrier": "Pressure Relief Valve & Inline Burst Disk",
+        "operational_activity": "Drilling Operations",
+        "site_location": "Moran Rig #04",
+        "evidence_quote": "Driller noticed pressure gauge fluctuating erratically on choke manifold",
+        "sif_score": 80,
+        "sif_potential": false,
+        "sif_category": "LOW",
+        "iogp_rule": "Bypassing Safety Controls",
+        "iogp_rules": [
+          "Bypassing Safety Controls"
+        ],
+        "critical_barrier_failure": false,
+        "inference_engine": "fallback",
+        "analysis_engine": "deterministic_fallback",
+        "model_name": "Deterministic Fallback Engine",
+        "model_version": "1.0",
+        "analyzed_at": "2026-09-08T06:42:42.759Z",
+        "duplicateFingerprint": "e8efbdd2aa962561611cf6b1d990b9feeb3642f93083f01b78a201dd16622d55",
+        "reportedAt": "Sep 8, 2026 • 12:12 PM IST",
+        "reporter": {
+          "name": "Priyanka Bora",
+          "role": "HSE Lead Reviewer",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+          "email": "priyanka@oilindia.in",
+          "station": "Moran Rig #04",
+          "radioChannel": "UHF CH-04",
+          "badgeId": "OIL-FLD-5542",
+          "phone": "+91 94350 44521"
+        },
+        "status": "To Do",
+        "columnId": "col-1",
+        "createdAt": "2026-09-08T06:42:42.805Z",
+        "humanReviewed": true,
+        "reviewAudit": {
+          "reviewedBy": {
+            "name": "Priyanka Bora",
+            "email": "priyanka@oilindia.in",
+            "badgeId": "OIL-MGR-1002",
+            "role": "Chief General Manager (Process Safety & SIF Control)"
+          },
+          "reviewedAt": "2026-09-08T06:43:15.772Z",
+          "decision": "corrected",
+          "notes": "Manager reclassified consequence to high-pressure wellhead blowout.",
+          "originalAssessment": {
+            "hazard": "Operational Safety Hazard",
+            "possible_consequence": "High-pressure fluid injection injury, severe projectile impact puncture, or traumatic limb amputation",
+            "failed_barrier": "Safety Barrier Control",
+            "sif_score": 35
+          },
+          "correctedAssessment": {
+            "hazard": "High Pressure Wellhead Choke Manifold",
+            "possible_consequence": "Catastrophic wellhead rupture and toxic pressurized oil spray",
+            "failed_barrier": "Pressure Relief Valve & Inline Burst Disk",
+            "sif_score": 80
+          }
+        },
+        "reviewer": {
+          "name": "Priyanka Bora",
+          "email": "priyanka@oilindia.in",
+          "badgeId": "OIL-MGR-1002",
+          "role": "Chief General Manager (Process Safety & SIF Control)",
+          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+          "station": "Duliajan Corporate HQ",
+          "radioChannel": "COMMAND CH-01",
+          "phone": "+91 374 280 4501"
+        },
+        "updatedAt": "2026-09-08T06:43:15.775Z"
+      },
+      {
+        "id": "worker-concern-1788817860519-7nj3t",
+        "title": "Confined Space — gas leak in a reported site",
+        "description": "Quote: \"gas leak in a reported site\" | Failed Barrier: Gas Detector",
+        "tags": [
+          {
+            "label": "Confined Space",
+            "dotColor": "bg-blue-500"
+          },
+          {
+            "label": "SIF 82",
+            "dotColor": "bg-red-500"
+          }
+        ],
+        "priority": "High",
+        "date": "Sep 8",
+        "comments": 0,
+        "attachments": 0,
+        "avatars": [
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+        ],
+        "observation": "gas leak in a reported site",
+        "hazard": "Confined Space",
+        "failed_barrier": "Gas Detector",
+        "failed_barrier_type": "Gas Detector",
+        "operational_activity": "Confined Space Tank Cleaning",
+        "site_location": "Moran Oilfield Rig 2",
+        "evidence_quote": "gas leak in a reported site",
+        "sif_score": 82,
+        "sif_potential": true,
+        "sif_category": "HIGH",
+        "iogp_rule": "Confined Space",
+        "iogp_rules": [
+          "Confined Space"
+        ],
+        "critical_barrier_failure": true,
+        "inference_engine": "modal",
+        "analysis_engine": "modal",
+        "model_name": "Fine-Tuned SLM (Modal Cloud)",
+        "model_version": "unknown",
+        "analyzed_at": "2026-09-07T21:51:00.463Z",
+        "reportedAt": "Sep 8, 2026 • 03:21 AM IST",
+        "reporter": {
+          "name": "Lav Kumar",
+          "role": "HSE Field Safety Officer (Derrick Floor)",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+          "email": "lav@gmail.com",
+          "station": "Moran Rig #04 • Wellhead Section",
+          "radioChannel": "UHF CH-04",
+          "badgeId": "OIL-FLD-5542",
+          "phone": "+91 94350 44521"
+        },
+        "status": "To Do",
+        "columnId": "col-1",
+        "createdAt": "2026-09-07T21:51:00.519Z",
+        "llmSuggestions": [
+          "Evacuate non-essential personnel upwind to designated muster point and verify fixed detector loop telemetry with central control room.",
+          "Deploy portable multi-gas detector survey to establish 10 ppm H2S exclusion zone prior to manual maintenance authorization.",
+          "Require positive pressure SCBA apparatus for entry and verify calibration certificates of gas detection instrumentation."
+        ],
+        "possible_consequence": "Acute respiratory paralysis, fatal toxic asphyxiation, or multiple-casualty knockdown"
+      },
+      {
         "id": "worker-concern-1788716886017",
         "title": "Flammable/Gaseous Atmosphere — Oil spill of approximately 200 ml observed near workshop entrance. Area cleaned immediately.",
         "description": "Quote: \"Oil spill of approximately 200 ml observed near workshop entrance. Area cleaned immediately.\" | Failed Barrier: Confined Space Entry Permit, Multi-Gas Atmospheric Testing & Ventilation",
@@ -48,7 +202,8 @@
         ],
         "status": "To Do",
         "columnId": "col-1",
-        "createdAt": "2026-09-06T17:48:06.017Z"
+        "createdAt": "2026-09-06T17:48:06.017Z",
+        "possible_consequence": "Acute respiratory paralysis, fatal toxic asphyxiation, or multiple-casualty knockdown"
       },
       {
         "id": "worker-concern-1788716412400",
@@ -95,7 +250,8 @@
         ],
         "status": "To Do",
         "columnId": "col-1",
-        "createdAt": "2026-09-06T17:40:12.400Z"
+        "createdAt": "2026-09-06T17:40:12.400Z",
+        "possible_consequence": "Severe occupational physical trauma, barrier breach, or acute personal injury"
       },
       {
         "id": "worker-concern-1788695082997",
@@ -141,7 +297,8 @@
         ],
         "status": "To Do",
         "columnId": "col-1",
-        "createdAt": "2026-09-06T11:44:42.997Z"
+        "createdAt": "2026-09-06T11:44:42.997Z",
+        "possible_consequence": "Massive crush trauma from dropped heavy suspended load or catastrophic rigging collapse"
       },
       {
         "id": "worker-concern-1788701200000",
@@ -188,7 +345,8 @@
         ],
         "status": "To Do",
         "columnId": "col-1",
-        "createdAt": "2026-09-06T13:45:00.000Z"
+        "createdAt": "2026-09-06T13:45:00.000Z",
+        "possible_consequence": "Fatal fall from height or catastrophic permanent spinal trauma"
       },
       {
         "id": "worker-concern-1788688400000",
@@ -235,7 +393,8 @@
         ],
         "status": "To Do",
         "columnId": "col-1",
-        "createdAt": "2026-09-05T09:50:00.000Z"
+        "createdAt": "2026-09-05T09:50:00.000Z",
+        "possible_consequence": "Fatal fall from height or catastrophic permanent spinal trauma"
       },
       {
         "id": "worker-concern-1788674200000",
@@ -282,7 +441,8 @@
         ],
         "status": "To Do",
         "columnId": "col-1",
-        "createdAt": "2026-09-05T05:45:00.000Z"
+        "createdAt": "2026-09-05T05:45:00.000Z",
+        "possible_consequence": "Severe occupational physical trauma, barrier breach, or acute personal injury"
       }
     ]
   },
@@ -345,7 +505,8 @@
         ],
         "status": "In Progress",
         "columnId": "col-2",
-        "createdAt": "2026-09-04T11:00:00.000Z"
+        "createdAt": "2026-09-04T11:00:00.000Z",
+        "possible_consequence": "Acute respiratory paralysis, fatal toxic asphyxiation, or multiple-casualty knockdown"
       },
       {
         "id": "worker-concern-1788653800000",
@@ -402,7 +563,8 @@
         ],
         "status": "In Progress",
         "columnId": "col-2",
-        "createdAt": "2026-09-04T05:15:00.000Z"
+        "createdAt": "2026-09-04T05:15:00.000Z",
+        "possible_consequence": "Hydrocarbon flash fire, catastrophic vapor cloud explosion (VCE), or severe third-degree thermal burns"
       },
       {
         "id": "worker-concern-1788642000000",
@@ -459,7 +621,8 @@
         ],
         "status": "In Progress",
         "columnId": "col-2",
-        "createdAt": "2026-09-03T08:40:00.000Z"
+        "createdAt": "2026-09-03T08:40:00.000Z",
+        "possible_consequence": "High-pressure fluid injection injury, severe projectile impact puncture, or traumatic limb amputation"
       }
     ]
   },
@@ -522,7 +685,8 @@
         "status": "Done",
         "columnId": "col-3",
         "createdAt": "2026-09-06T12:24:35.394Z",
-        "updatedAt": "2026-09-06T17:27:01.433Z"
+        "updatedAt": "2026-09-06T17:27:01.433Z",
+        "possible_consequence": "Acute respiratory paralysis, fatal toxic asphyxiation, or multiple-casualty knockdown"
       },
       {
         "id": "worker-concern-1788631000000",
@@ -579,7 +743,8 @@
         "status": "Done",
         "columnId": "col-3",
         "createdAt": "2026-09-02T15:40:00.000Z",
-        "updatedAt": "2026-09-03T04:20:00.000Z"
+        "updatedAt": "2026-09-03T04:20:00.000Z",
+        "possible_consequence": "Acute respiratory paralysis, fatal toxic asphyxiation, or multiple-casualty knockdown"
       },
       {
         "id": "worker-concern-1788622000000",
@@ -636,7 +801,8 @@
         "status": "Done",
         "columnId": "col-3",
         "createdAt": "2026-09-02T05:50:00.000Z",
-        "updatedAt": "2026-09-02T14:15:00.000Z"
+        "updatedAt": "2026-09-02T14:15:00.000Z",
+        "possible_consequence": "High-pressure fluid injection injury, severe projectile impact puncture, or traumatic limb amputation"
       },
       {
         "id": "worker-concern-1788610000000",
@@ -693,7 +859,8 @@
         "status": "Done",
         "columnId": "col-3",
         "createdAt": "2026-09-01T09:10:00.000Z",
-        "updatedAt": "2026-09-01T16:30:00.000Z"
+        "updatedAt": "2026-09-01T16:30:00.000Z",
+        "possible_consequence": "Massive crush trauma from dropped heavy suspended load or catastrophic rigging collapse"
       }
     ]
   }

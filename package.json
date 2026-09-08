@@ -1,12 +1,15 @@
 {
   "name": "sih",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:patterns": "jiti scripts/verify_patterns.mjs",
+    "test:inference": "node scripts/verify_three_way_inference.mjs",
+    "test": "node scripts/verify_hardening.mjs && node scripts/verify_demo_login.mjs && node scripts/test_session_secret.mjs && jiti scripts/verify_patterns.mjs && node scripts/verify_no_cycles.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

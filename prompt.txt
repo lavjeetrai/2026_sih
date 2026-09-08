@@ -1,0 +1,639 @@
+<USER_REQUEST>
+AUDIT ONLY — DO NOT MODIFY THE PROJECT
+
+We have cloned the latest SentinelSIF AI repository, which already
+contains the fine-tuned model integration.
+
+We are restarting the project audit from a clean baseline.
+
+IMPORTANT:
+DO NOT MODIFY ANY FILE.
+DO NOT REFACTOR.
+DO NOT FIX ANYTHING.
+DO NOT CHANGE THE DATABASE.
+DO NOT CHANGE THE AI MODEL.
+DO NOT CHANGE THE UI.
+
+This task is READ-ONLY.
+
+==================================================
+PROJECT TO AUDIT
+==================================================
+
+Project:
+
+SentinelSIF AI
+
+SIH Problem Statement:
+
+AI/NLP Engine to Detect Serious Injury & Fatality (SIF) Precursors
+in OIL's Unsafe-Act/Unsafe-Condition and Near-Miss Reports.
+
+The required solution is:
+
+1. Ingest OIL free-text safety reports:
+   - Unsafe Act / Unsafe Condition
+   - Near Miss
+   - Incident reports
+
+2. Classify reports as:
+   - SIF-potential
+   - non-SIF-potential
+
+3. Map reports to relevant IOGP Life-Saving Rules.
+
+4. Surface recurring warning/precursor patterns involving:
+   - activity
+   - location
+   - safety protection / barrier failure
+
+5. Provide an interactive dashboard.
+
+6. Rank sites and activities by SIF-related warning/precursor priority.
+
+7. Help HSE teams focus interventions where serious/fatal potential
+   is highest.
+
+==================================================
+INTENDED PRODUCT ARCHITECTURE
+==================================================
+
+The intended system flow is:
+
+SAFETY REPORT
+↓
+CLEAN / ANONYMIZE
+↓
+FINE-TUNED NLP / AI
+↓
+STRUCTURED SAFETY INFORMATION
+↓
+SIF POTENTIAL
+↓
+LIFE-SAVING RULE(S)
+↓
+SAFETY PROTECTION
+↓
+WHAT WENT WRONG
+↓
+CROSS-REPORT PATTERN ANALYSIS
+↓
+REPEATED WARNING PATTERN
+↓
+TREND
+↓
+PRIORITY
+↓
+HSE DASHBOARD
+↓
+HUMAN REVIEW
+↓
+FEEDBACK FOR FUTURE IMPROVEMENT
+
+==================================================
+IMPORTANT PRODUCT POSITIONING
+==================================================
+
+The system must NOT claim:
+
+- exact accident prediction
+- probability of death
+- guaranteed accident prevention
+- autonomous safety decisions
+- replacement of HSE experts
+
+It is:
+
+AN AI-ASSISTED SAFETY INTELLIGENCE AND PRIORITIZATION SYSTEM.
+
+==================================================
+AUDIT OBJECTIVE
+==================================================
+
+Inspect the ACTUAL CODEBASE.
+
+Do not judge the system based only on UI text.
+
+For every capability, determine whether it is:
+
+✅ REAL + WORKING
+🟡 PARTIALLY IMPLEMENTED
+🔴 MISSING
+⚠️ UI MOCKUP / CLAIM ONLY
+❓ UNVERIFIED
+
+==================================================
+PART 1 — REPOSITORY ARCHITECTURE
+==================================================
+
+Map the project:
+
+Frontend
+Backend
+AI/model layer
+Database
+API layer
+Pattern engine
+Analytics
+Authentication
+HSE review
+Bulk ingestion
+Landing page
+
+For each, identify the important files.
+
+==================================================
+PART 2 — FINE-TUNED MODEL AUDIT
+==================================================
+
+This is extremely important because the latest repository now
+contains the fine-tuned model integration.
+
+Determine:
+
+1. What model is being used?
+2. Where is it hosted?
+3. How is it called?
+4. What input does it receive?
+5. What output does it return?
+6. What is the exact output schema?
+7. Is the fine-tuned model actually used by /api/analyze?
+8. Is automatic routing implemented?
+9. What happens when the model is unavailable?
+10. What fallback is used?
+11. Is the fallback consistent with the model schema?
+12. Is model confidence available?
+13. Is model version recorded?
+14. Can we distinguish:
+    - fine_tuned_model
+    - Ollama
+    - deterministic fallback
+15. Is the actual model result stored in MongoDB?
+
+Do not merely check that the code imports the model.
+Verify the full inference path.
+
+==================================================
+PART 3 — END-TO-END DATA FLOW
+==================================================
+
+Trace one report through the real system:
+
+USER INPUT
+↓
+API
+↓
+MODEL
+↓
+STRUCTURED RESULT
+↓
+DATABASE
+↓
+PATTERN ENGINE
+↓
+ANALYTICS
+↓
+DASHBOARD
+↓
+HSE REVIEW
+
+Identify any breaks, duplicated logic, stale fields,
+or disconnected components.
+
+==================================================
+PART 4 — SIF ASSESSMENT
+==================================================
+
+Verify:
+
+- How SIF potential is determined.
+- Whether it is actually model-based.
+- Whether rules are involved.
+- Whether actual outcome is separated from potential outcome.
+- Whether "no injury" can still be classified as high potential.
+- Whether explanations are generated.
+- Whether evidence comes from the report.
+- Whether numeric scores have a defensible meaning.
+
+Flag any arbitrary scoring.
+
+SIF potential must not be treated as probability of fatality.
+
+==================================================
+PART 5 — LIFE-SAVING RULES
+==================================================
+
+Inspect the actual LSR implementation.
+
+Verify:
+
+- Official IOGP 9 rules are used.
+- One report can map to multiple rules.
+- Context is considered.
+- Negation is handled.
+
+Test conceptually:
+
+"Lockout was correctly verified."
+
+versus:
+
+"Lockout verification was skipped."
+
+Do NOT assume the implementation is correct merely because the
+UI displays an LSR.
+
+==================================================
+PART 6 — SAFETY PROTECTION / BARRIER ANALYSIS
+==================================================
+
+Verify whether the system actually identifies:
+
+- safety protection
+- failure state
+- what went wrong
+
+Verify support for:
+
+- Missing
+- Not followed
+- Bypassed
+- Damaged
+- Not checked
+
+Determine whether this comes from actual analysis or frontend
+defaults.
+
+==================================================
+PART 7 — CROSS-REPORT WARNING PATTERNS
+==================================================
+
+THIS IS THE MOST IMPORTANT AUDIT.
+
+Inspect the actual pattern engine.
+
+Determine whether it can:
+
+1. Compare multiple reports.
+2. Handle different wording.
+3. Identify semantically related reports.
+4. Group related reports.
+5. Compare activity.
+6. Compare location.
+7. Compare safety protection.
+8. Compare failure type.
+9. Detect repetition over time.
+10. Detect increasing/decreasing/stable trends.
+11. Produce a meaningful recurring warning pattern.
+12. Connect the pattern to priority.
+
+Test conceptually with different wording:
+
+Report A:
+"Isolation verification was skipped."
+
+Report B:
+"Equipment remained energized when maintenance began."
+
+Report C:
+"Technician relied on the previous shift's isolation."
+
+Report D:
+"Zero-energy confirmation was not performed."
+
+Determine whether the current engine would identify the common
+underlying safety weakness.
+
+Be honest if it would not.
+
+==================================================
+PART 8 — PRIORITY ENGINE
+==================================================
+
+Inspect how priority is calculated.
+
+Determine:
+
+- exact inputs
+- exact formula
+- whether the score is explainable
+- whether repetition affects it
+- whether trend affects it
+- whether SIF potential affects it
+- whether safety-protection failure affects it
+
+Check whether high reporting volume could incorrectly appear
+to mean high risk.
+
+Check whether priority is different from SIF potential.
+
+==================================================
+PART 9 — ANALYTICS / DASHBOARD
+==================================================
+
+Verify whether the dashboard is based on real stored data.
+
+Check:
+
+- total reports
+- SIF potential
+- LSR distribution
+- site ranking
+- activity ranking
+- safety protection
+- warning patterns
+- trends
+- priority
+
+Look specifically for:
+
+- hardcoded numbers
+- fake baselines
+- artificial multipliers
+- disconnected APIs
+- stale demo data
+
+Determine whether:
+
+NEW REPORT
+→ DATABASE
+→ ANALYTICS
+→ DASHBOARD
+
+actually works.
+
+==================================================
+PART 10 — BULK DATA
+==================================================
+
+Inspect bulk ingestion.
+
+Verify:
+
+- CSV validation
+- duplicate handling
+- missing fields
+- invalid dates
+- batch analysis
+- error reporting
+- database storage
+- dashboard update
+
+Determine the maximum practical demo volume.
+
+==================================================
+PART 11 — HUMAN REVIEW
+==================================================
+
+Verify:
+
+AI RESULT
+↓
+HSE REVIEW
+↓
+CONFIRM / CORRECT
+↓
+SAVE
+↓
+AUDIT RECORD
+
+Check whether:
+
+- AI result is preserved
+- evidence is preserved
+- reviewer is recorded
+- timestamp is recorded
+- corrections are recorded
+- review survives reload
+
+Check whether HSE corrections influence future datasets
+or are merely stored without purpose.
+
+==================================================
+PART 12 — DATA QUALITY / ANONYMIZATION
+==================================================
+
+Inspect:
+
+- report cleaning
+- personal information handling
+- anonymization
+- sensitive operational data
+- duplicate reports
+- malformed input
+
+Determine whether anonymization is real or only documented.
+
+==================================================
+PART 13 — SECURITY
+==================================================
+
+Audit:
+
+- authentication
+- authorization
+- password storage
+- session security
+- API access control
+- user isolation
+
+Test conceptually whether a user can manipulate request parameters
+to access another user's reports.
+
+==================================================
+PART 14 — DEMO DATA / CLAIMS
+==================================================
+
+Search the entire repository and website for:
+
+- invented statistics
+- fake OIL site names
+- fake employees
+- fake incident counts
+- fake sensor counts
+- unsupported real-time claims
+- unsupported historical claims
+- unsupported autonomous actions
+
+For every claim classify it:
+
+REAL
+DEMO
+ILLUSTRATIVE
+UNSUPPORTED
+
+==================================================
+PART 15 — WEBSITE VS ACTUAL PRODUCT
+==================================================
+
+Audit every landing-page claim.
+
+For each:
+
+WEBSITE CLAIM
+ACTUAL CODE SUPPORT
+STATUS
+RECOMMENDATION
+
+Pay special attention to:
+
+- SIF assessment
+- Life-Saving Rules
+- Safety protection failure
+- warning patterns
+- risk building
+- HSE action
+- human review
+
+==================================================
+PART 16 — MODEL EVALUATION
+==================================================
+
+Determine whether the repository contains:
+
+- labelled dataset
+- training data
+- validation data
+- test data
+- evaluation scripts
+- precision
+- recall
+- F1
+- confusion matrix
+- LSR evaluation
+- pattern evaluation
+
+If not present, identify this as a gap.
+
+Do NOT invent evaluation results.
+
+==================================================
+PART 17 — ROBUSTNESS / EDGE CASES
+==================================================
+
+Identify how the system handles:
+
+- negation
+- incomplete reports
+- ambiguous reports
+- spelling mistakes
+- multiple hazards
+- multiple LSRs
+- missing location
+- missing activity
+- duplicate reports
+- contradictory statements
+- unusual terminology
+- very long reports
+
+==================================================
+PART 18 — JUDGE ATTACK TEST
+==================================================
+
+Act like a skeptical SIH judge.
+
+Determine whether the current implementation can defend these:
+
+1. What exactly makes a report SIF-potential?
+2. How is this different from normal incident classification?
+3. How do you handle no-injury but high-potential events?
+4. How do you know the AI is correct?
+5. What happens when AI is wrong?
+6. How are Life-Saving Rules mapped?
+7. Can one report have multiple rules?
+8. How do you detect repeated patterns?
+9. How do you handle different wording for the same problem?
+10. How do you calculate priority?
+11. Why doesn't more reporting automatically mean more risk?
+12. What exactly is innovative?
+13. Why would OIL use this?
+14. How is this different from commercial EHS products?
+15. What data do you train on?
+16. What happens if OIL's real data is unavailable?
+17. Is this accident prediction?
+18. Who makes the final safety decision?
+19. What is the biggest limitation?
+20. What part is genuinely AI?
+
+For each:
+STRONG / MEDIUM / WEAK
+
+==================================================
+PART 19 — FINAL GAP MATRIX
+==================================================
+
+Create a table:
+
+AREA
+CURRENT STATUS
+EVIDENCE
+PROBLEM
+SEVERITY
+RECOMMENDED FIX
+
+Severity:
+
+P0 = Must fix
+P1 = Important
+P2 = Nice to have
+
+==================================================
+PART 20 — FINAL VERDICT
+==================================================
+
+Give:
+
+Problem Statement Compliance: /10
+AI Implementation: /10
+Fine-Tuned Model Integration: /10
+SIF Assessment: /10
+LSR Mapping: /10
+Safety Protection Analysis: /10
+Pattern Detection: /10
+Priority Engine: /10
+Dashboard: /10
+Human Review: /10
+Security: /10
+Data Quality: /10
+Innovation: /10
+Demo Readiness: /10
+
+Then:
+
+OVERALL READINESS: /10
+
+Then clearly answer:
+
+"Can this project currently demonstrate the full SIH problem
+statement end-to-end?"
+
+YES / PARTIALLY / NO
+
+==================================================
+CRITICAL RULE
+==================================================
+
+DO NOT MODIFY ANYTHING.
+
+Do not fix files.
+Do not create files.
+Do not refactor.
+Do not commit.
+
+Only inspect and report.
+
+Be brutally honest.
+
+A visually implemented feature is NOT considered complete
+unless the underlying code actually performs it.
+
+The purpose of this audit is to establish the TRUE state of
+the latest tuned-model-integrated repository before we make
+any changes.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-08T02:30:53+05:30.
+</ADDITIONAL_METADATA>
+<USER_SETTINGS_CHANGE>
+The user changed setting `Model Selection` from None to Gemini 3.8 Flash (High). No need to comment on this change if the user doesn't ask about it. If reporting what model you are, please use a human readable name instead of the exact string.
+</USER_SETTINGS_CHANGE>
