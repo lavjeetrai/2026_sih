@@ -16,6 +16,8 @@ import {
   Phone,
   ShieldCheck,
   Mail,
+  Lock,
+  Fingerprint,
 } from "lucide-react";
 import { CardData } from "@/lib/concerns";
 import { mapToLifeSavingRule } from "@/lib/lsr";
@@ -24,6 +26,7 @@ import {
   CompactProfileCard,
   type SocialLink,
 } from "./animated-profile-card";
+import { RcaFiveWhysSection } from "./rca-five-whys-section";
 
 interface CardDetailModalProps {
   card: CardData | null;
@@ -33,6 +36,7 @@ interface CardDetailModalProps {
   onMoveColumn: (cardId: string, targetColId: string) => void;
   onDeleteCard?: (colId: string, cardId: string) => void;
   currentManager?: UserSessionData | null;
+  onUpdateCard?: (updatedCard: CardData) => void;
 }
 
 function getCleanObservation(card: CardData): string {
@@ -63,13 +67,19 @@ export function CardDetailModal({
   onMoveColumn,
   onDeleteCard,
   currentManager,
+  onUpdateCard,
 }: CardDetailModalProps) {
+  const [activeCard, setActiveCard] = useState<CardData | null>(card);
   const [copied, setCopied] = useState(false);
   const [copiedPlan, setCopiedPlan] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
-  const cardId = card?.id;
+  useEffect(() => {
+    setActiveCard(card);
+  }, [card]);
+
+  const cardId = activeCard?.id;
 
   // Load or fetch suggestions once per card ID
   useEffect(() => {
@@ -315,6 +325,12 @@ export function CardDetailModal({
                       }`}
                     >
                       {card.priority} Priority
+                    </span>
+                  )}
+                  {(activeCard?.ledgerLock?.isLocked || activeCard?.status === "Fix Deployed & Locked") && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-900 text-emerald-300 border border-emerald-700 shadow-2xs">
+                      <Lock size={12} className="text-emerald-400" />
+                      Fix Deployed & Locked ({activeCard?.ledgerLock?.blockId || "SEALED"})
                     </span>
                   )}
                   {card.tags?.map((tag, idx) => {
@@ -633,6 +649,18 @@ export function CardDetailModal({
                     <span className="text-neutral-600 font-semibold">Zero SIF Target 2026</span>
                   </div>
                 </div>
+
+                {/* FixLedger Tamper-Proof 5-Whys RCA & Cryptographic Lock Section */}
+                {activeCard && (
+                  <RcaFiveWhysSection
+                    card={activeCard}
+                    onCardUpdated={(updated) => {
+                      setActiveCard(updated);
+                      onUpdateCard?.(updated);
+                    }}
+                    currentManager={currentManager}
+                  />
+                )}
               </div>
             </div>
           </div>

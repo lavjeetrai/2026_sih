@@ -12,6 +12,8 @@ import {
   LogOut,
   Menu,
   Users,
+  Lock,
+  ShieldCheck,
 } from "lucide-react";
 import { type UserSessionData } from "@/components/ui/auth-form-1";
 import { UserProfileOverlay } from "@/components/ui/profile-card-1";
@@ -155,6 +157,18 @@ export function Sidenavbar({
                 )}
               </Button>
             )}
+
+            <Button
+              variant="ghost"
+              onClick={() => onSelect?.("FixLedger")}
+              className={cn(
+                "w-full justify-start text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100",
+                activeItem === "FixLedger" && "bg-neutral-100 text-neutral-900 font-semibold"
+              )}
+            >
+              <ShieldCheck className="mr-2 h-4 w-4 shrink-0 text-neutral-700" />
+              {isOpen && "FixLedger"}
+            </Button>
           </nav>
         </ScrollArea>
 

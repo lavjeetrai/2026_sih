@@ -586,7 +586,8 @@ export function OfficerConcernHistory({ user, onLogNewConcern }: OfficerConcernH
           onClose={() => setInspectCardInfo(null)}
           onMoveColumn={() => {}}
           onDeleteCard={() => {}}
-          currentManager={null}
+          currentManager={user}
+          onUpdateCard={() => fetchConcerns()}
         />
       )}
     </div>

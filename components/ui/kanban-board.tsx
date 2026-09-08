@@ -16,6 +16,7 @@ import {
   ArrowDownWideNarrow,
   ArrowUpNarrowWide,
   Clock,
+  Lock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CardData, ColumnData, Priority, Tag } from "@/lib/concerns";
@@ -410,6 +411,15 @@ export function KanbanBoard({ user }: { user?: UserSessionData | null } = {}) {
           onMoveColumn={handleMoveColumn}
           onDeleteCard={handleDeleteCard}
           currentManager={user}
+          onUpdateCard={(updated) => {
+            setBoard((prev) =>
+              prev.map((col) => ({
+                ...col,
+                cards: col.cards.map((c) => (c.id === updated.id ? updated : c)),
+              }))
+            );
+            setSelectedCardInfo((prev) => (prev ? { ...prev, card: updated } : null));
+          }}
         />
       )}
     </div>
@@ -598,6 +608,12 @@ function KanbanCard({
         {/* Header: Tags, Priority & Action Menu */}
         <div className="flex items-center justify-between">
           <div className="flex flex-wrap gap-1.5">
+            {(card.ledgerLock?.isLocked || card.status === "Fix Deployed & Locked") && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide bg-neutral-900 text-emerald-400 border border-emerald-500/40 shadow-2xs uppercase">
+                <Lock size={10} className="text-emerald-400 animate-pulse" />
+                Fix Locked ({card.ledgerLock?.blockId || "SEALED"})
+              </span>
+            )}
             {card.tags?.map((tag, idx) => (
               <span
                 key={idx}
