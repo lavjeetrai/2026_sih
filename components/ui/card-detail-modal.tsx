@@ -356,6 +356,18 @@ export function CardDetailModal({
                       : card.observation
                     : card.title}
                 </h2>
+
+                {sifScore > 75 && (
+                  <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs font-medium mt-1">
+                    <span className="flex h-2 w-2 relative shrink-0">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                    </span>
+                    <span>
+                      <strong className="font-semibold">Automated Escalation:</strong> SIF Precursor Density ({sifScore}) exceeds the critical threshold of 75. Automatically routed to <em className="font-bold underline">In Progress</em> for immediate field mitigation.
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* SIF Density Gauge Badge */}
@@ -417,6 +429,34 @@ export function CardDetailModal({
                     {cleanObsText}
                   </p>
                 </div>
+
+                {/* Official Officer Voice Memo Player */}
+                {card.voiceNoteUrl && (
+                  <div className="bg-gradient-to-r from-neutral-900 to-neutral-950 text-white rounded-xl p-3.5 shadow-md border border-neutral-800 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-2 w-2 relative">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <span className="text-[11px] font-bold tracking-wider uppercase text-neutral-200 flex items-center gap-1">
+                          🎙️ Officer Spoken Voice Dispatch
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/50">
+                        AUTHENTIC AUDIO
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-neutral-400">
+                      Original voice note dictated by the field safety officer at {reporterStation}.
+                    </p>
+                    <audio
+                      controls
+                      src={card.voiceNoteUrl}
+                      className="w-full h-8 rounded accent-emerald-500 mt-1"
+                    />
+                  </div>
+                )}
 
                 {/* Reviewing HSE Manager Compact Profile Card / Pending Assignment */}
                 {card.reviewer ? (

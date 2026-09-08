@@ -44,7 +44,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { observation, autoDispatch = true, reporter, engine } = body;
+    const { observation, autoDispatch = true, reporter, engine, voiceNoteUrl } = body;
 
     if (!observation || typeof observation !== "string" || !observation.trim()) {
       return NextResponse.json(
@@ -73,6 +73,7 @@ export async function POST(req: Request) {
           critical_barrier_failure: result.critical_barrier_failure,
           inference_engine: result.engine,
           reporter,
+          voiceNoteUrl,
         });
       } catch (dispatchErr) {
         console.warn("Could not auto-dispatch concern to manager board:", dispatchErr);
@@ -83,6 +84,7 @@ export async function POST(req: Request) {
       success: true,
       data: result,
       concernCard,
+      autoEscalated: (result.sif_score ?? 0) > 75,
     });
   } catch (error: unknown) {
     const errorMessage =

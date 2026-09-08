@@ -76,5 +76,83 @@
       "assignedRole": "manager",
       "remarks": "Verified credentials and assigned station clearance at Moran Rig #04 • Wellhead Section."
     }
+  },
+  {
+    "_id": "6a9e84f4591639e758874e43",
+    "name": "Sai",
+    "email": "saivaibhav5594@gmail.com",
+    "password": "SaiVaibhav@1234",
+    "role": "worker",
+    "requestedRole": "worker",
+    "badgeId": "lklhjfihf",
+    "designation": "lkhqdifh",
+    "station": "ihqdfihjf",
+    "radioChannel": "popjfsijfi",
+    "phone": "kqghjgigjejgfij",
+    "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    "status": "approved",
+    "createdAt": "2026-09-07T09:33:40.537Z",
+    "updatedAt": "2026-09-07T09:34:20.168Z",
+    "approval": {
+      "approvedByManagerName": "Lav Kumar",
+      "approvedByManagerBadge": "OIL-FLD-5542",
+      "approvedByManagerEmail": "lav@gmail.com",
+      "approvedByManagerDesignation": "HSE Field Safety Officer (Derrick Floor)",
+      "approvedAt": "2026-09-07T09:34:20.168Z",
+      "assignedRole": "worker",
+      "remarks": "Verified credentials and assigned station clearance at ihqdfihjf."
+    }
+  },
+  {
+    "_id": "6a9ea18dd8e748e1bf3b3504",
+    "name": "New Field Officer",
+    "email": "test_officer_1788780941423@oilindia.in",
+    "password": "4b89d2afeffdf8c555ce951b0b3f9a7d:d82a3daa1ee68c0688cc493f235f3f9a784913e7227c2c9544d9e4ad5f6eadfb36427076f73ee7bf59fcd1c3df3cbf019e5c74cb6171568c4e004424fc29b458",
+    "role": "worker",
+    "requestedRole": "worker",
+    "badgeId": "OIL-NEW-9999",
+    "designation": "Rig Safety Inspector",
+    "station": "Moran Rig #04",
+    "radioChannel": "UHF CH-04",
+    "phone": "+91 94350 99999",
+    "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    "status": "approved",
+    "createdAt": "2026-09-07T11:35:41.545Z",
+    "updatedAt": "2026-09-07T18:02:18.428Z",
+    "approval": {
+      "approvedByManagerName": "Lav Kumar",
+      "approvedByManagerBadge": "OIL-FLD-5542",
+      "approvedByManagerEmail": "lav@gmail.com",
+      "approvedByManagerDesignation": "HSE Field Safety Officer (Derrick Floor)",
+      "approvedAt": "2026-09-07T18:02:18.428Z",
+      "assignedRole": "worker",
+      "remarks": "Verified credentials and assigned station clearance at Moran Rig #04."
+    }
+  },
+  {
+    "_id": "6a9f0cfd3cd29f86ff7ebb32",
+    "name": "New Field Officer",
+    "email": "test_officer_1788808445570@oilindia.in",
+    "password": "2b5edfdf885a6d1ae01a2513a5e4f5d3:c2b04e39c702cf4d7854f30c3dbb1672afe8b76f30e193985890647b918a517ccf2e7cc5b681e3b237aeac38de9f10df02e4eba5f86fa803dbe41a5367ea13c8",
+    "role": "worker",
+    "requestedRole": "worker",
+    "badgeId": "OIL-NEW-9999",
+    "designation": "Rig Safety Inspector",
+    "station": "Moran Rig #04",
+    "radioChannel": "UHF CH-04",
+    "phone": "+91 94350 99999",
+    "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    "status": "approved",
+    "createdAt": "2026-09-07T19:14:05.762Z",
+    "updatedAt": "2026-09-07T19:26:18.612Z",
+    "approval": {
+      "approvedByManagerName": "Lav Kumar",
+      "approvedByManagerBadge": "OIL-FLD-5542",
+      "approvedByManagerEmail": "lav@gmail.com",
+      "approvedByManagerDesignation": "HSE Field Safety Officer (Derrick Floor)",
+      "approvedAt": "2026-09-07T19:26:18.612Z",
+      "assignedRole": "worker",
+      "remarks": "Verified credentials and assigned station clearance at Moran Rig #04."
+    }
   }
 ]
